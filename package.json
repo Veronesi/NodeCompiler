@@ -1,0 +1,20 @@
+{
+  "name": "NodeCompiler",
+  "version": "1.0.0",
+  "description": "Compiler programed in NodeJs",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Veronesi/NodeCompiler.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Veronesi/NodeCompiler/issues"
+  },
+  "homepage": "https://github.com/Veronesi/NodeCompiler#readme"
+}
