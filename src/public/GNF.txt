@@ -1,0 +1,50 @@
+<Programa> 					::= <Sentencia> ";" <PorgramaFin>
+
+<PorgramaFin> 				::= <Sentencia> ";" <Programa> | ε
+
+<Sentencia> 				::= <Asignacion> | <Condicional> | <Ciclo> | <Lectura> | <Escritura>
+
+<Asignacion> 				::= "id" "OperadorAsignacion" <Expresion>
+
+<Expresion> 				::= <ExpresionAritmetica> | <ExpresionLista>
+	
+<ExpresionAritmetica>		::= <ExpresionAritmetica> "Operador" <ExpresionAritmetica> | "first" "(" <ExpresionLista> ")" <ExpresionAritmeticaFinal> | 
+								"Numero" <ExpresionAritmeticaFinal> | "id" <ExpresionAritmeticaFinal> | "(" <ExpresionAritmetica> ")" <ExpresionAritmeticaFinal>
+
+<ExpresionAritmeticaFinal>	::=	"Operador" <ExpresionAritmetica> | ε
+
+<ExpresionLista>			::= "rest" "(" <ExpresionLista> ")" | <Lista> | "cons" "(" <ExpresionCons>  ")" 
+
+<ExpresionCons>  			::= "Numero" "," <ExpresionLista> | "id" "," <ExpresionLista>
+
+<Lista> 					::= "[" <ListaInterna> "]" | "id"
+
+<ListaInterna>  			::= <ListaInterna> "," <ListaInternaNumero> | "Numero"
+
+<ListaInternaNumero> 		::= "Numero" | ε
+
+<Condicional> 				::= "if" <Condicion> "{" <Programa> <CierreCondicion>
+
+<CierreCondicion> 			::= "}" | "else" "{" <Programa> "}"
+
+<Ciclo> 					::= "while" <Condicion> "{" <Programa> "}"
+
+<Condicion> 				::= <ExpresionAritmetica> "Signo" <ExpresionAritmetica> | <Null>
+
+<Lectura> 					::= <LecturaNumero> | <LecturaLista>
+
+<Escritura> 				::= <EscribirNumero> | <EscribirLista>
+
+<LecturaNumero> 			::= "ReadInt" <EscrituraLectura> 
+
+<LecturaLista> 				::= "ReadList" <EscrituraLectura> 
+
+<EscribirNumero> 			::= "WriteInt" <EscrituraLectura> 
+
+<EscribirLista> 			::= "WriteList" <EscrituraLectura> 
+
+<EscrituraLectura> 			::=  "(" <Cadena> "id" ")"
+
+<Cadena> 					::= "Cadena" "," | ε
+
+<Null> 						::= "Null" "(" <ExpresionLista> ")"

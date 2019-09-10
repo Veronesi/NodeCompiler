@@ -1,4 +1,5 @@
-palabrasReservadas = [
+"use strict";
+const palabrasReservadas = [
     'REST',
     'CONS',
     'FIRST',
@@ -9,6 +10,6 @@ palabrasReservadas = [
     'READLIST',
     'WRITEINT',
     'WRITELIST'
-]
+];
 
-module.exports = palabrasReservadas
+module.exports = palabrasReservadas;

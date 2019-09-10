@@ -1,4 +1,5 @@
-caracter = [
+"use strict";
+const caracter = [
     {
         caracter: '.',
         valor: 'PUNTO'
@@ -83,6 +84,6 @@ caracter = [
         caracter: '>=',
         valor: 'SIGNO'
     },
-]
+];
 
-module.exports = caracter
+module.exports = caracter;

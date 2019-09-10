@@ -1,18 +1,21 @@
-/*
-const AnalizadorLexico = require('./tools/analizadorLexico');
+"use strict";
+const AnalisisLexico = require('./tools/AnalisisLexico');
+const AnalisisSintactico = require('./tools/AnalisisSintactico');
+//const Arbol = require('./models/Arbol');
 
-const elemento = AnalizadorLexico.analizarCadena('var1 = 4;')
-AnalizadorLexico.analizarElemento(elemento[0])
-
-*/
-const Lexico = require('./models/Lexico');
-const lexico = new Lexico()
-
-const tokens = lexico.start({
-    filename: 'example.f',
-    debug: false
+const analisisLexico = new AnalisisLexico();
+analisisLexico.start({
+    filename: 'example.f'
 }, () => {
-    
-})
+    console.table(analisisLexico.tokens);
+    const analisisSintactico = new AnalisisSintactico();
+    analisisSintactico.start({
+        tokens : analisisLexico.tokens,
+        tpyeImport: 'arr'
+    }, () => {
 
-console.table(tokens)
+    });
+});
+
+
+
