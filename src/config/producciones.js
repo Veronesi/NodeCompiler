@@ -1,17 +1,16 @@
 "use strict";
-const Porduccion = require('../models/Produccion');
 const producciones = [
-    new Porduccion({produccion: '<Programa>',                     produce: ['<Sentencia>', 'PUNTOYCOMA', '<ProgramaFin>']}),
-    new Porduccion({produccion: '<ProgramaFin>',                  produce: ['<Sentencia>', 'PUNTOYCOMA', '<Programa>']}),
-    new Porduccion({produccion: '<ProgramaFin>',                  produce: ['EPSILON']}),
-    new Porduccion({produccion: '<Programa>',                     produce: ['EPSILON']}),
-    new Porduccion({produccion: '<Sentencia>',                    produce: ['<Asignacion>']}),
-    new Porduccion({produccion: '<Asignacion>',                   produce: ['ID', 'OPERADORASIGNACION', '<Expresion>']}),
-    new Porduccion({produccion: '<Expresion>',                    produce: ['<ExpresionAritmetica>']}),
-    new Porduccion({produccion: '<ExpresionAritmetica>',          produce: ['ID', '<ExpresionAritmeticaFinal>']}),
-    new Porduccion({produccion: '<ExpresionAritmetica>',          produce: ['NUMERO', '<ExpresionAritmeticaFinal>']}),
-    new Porduccion({produccion: '<ExpresionAritmeticaFinal>',     produce: ['OPERADOR', '<ExpresionAritmetica>']}),
-    new Porduccion({produccion: '<ExpresionAritmeticaFinal>',     produce: ['EPSILON']}),
+    {name: 'Produccion', produccion: '<Programa>',                     produce: ['<Sentencia>', 'PUNTOYCOMA', '<ProgramaFin>']},
+    {name: 'Produccion', produccion: '<ProgramaFin>',                  produce: ['<Sentencia>', 'PUNTOYCOMA', '<Programa>']},
+    {name: 'Produccion', produccion: '<ProgramaFin>',                  produce: ['EPSILON']},
+    {name: 'Produccion', produccion: '<Programa>',                     produce: ['EPSILON']},
+    {name: 'Produccion', produccion: '<Sentencia>',                    produce: ['<Asignacion>']},
+    {name: 'Produccion', produccion: '<Asignacion>',                   produce: ['ID', 'OPERADORASIGNACION', '<Expresion>']},
+    {name: 'Produccion', produccion: '<Expresion>',                    produce: ['<ExpresionAritmetica>']},
+    {name: 'Produccion', produccion: '<ExpresionAritmetica>',          produce: ['ID', '<ExpresionAritmeticaFinal>']},
+    {name: 'Produccion', produccion: '<ExpresionAritmetica>',          produce: ['NUMERO', '<ExpresionAritmeticaFinal>']},
+    {name: 'Produccion', produccion: '<ExpresionAritmeticaFinal>',     produce: ['OPERADOR', '<ExpresionAritmetica>']},
+    {name: 'Produccion', produccion: '<ExpresionAritmeticaFinal>',     produce: ['EPSILON']},
 ];
 
 module.exports = producciones;

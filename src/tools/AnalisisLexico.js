@@ -3,7 +3,6 @@ const fs = require('fs');
 const Caracteres = require('../config/caracteres');
 const PalabrasReservadas = require('../config/palabrasReservadas');
 const expReg = require('./expReg');
-const Token = require('../models/Token');
 module.exports = class AnalisisLexico {
     constructor(){
         this.name = this.constructor.name;
@@ -54,11 +53,12 @@ module.exports = class AnalisisLexico {
                         texto = "";
                     }else{
                         texto = texto.slice(match[0].length);
-                        token.push(new Token({
+                        token.push({
+                            name: 'Token',
                             element: match[0],
                             type: type,
                             line: e.number
-                        }));
+                        });
                     }
                 }
             }

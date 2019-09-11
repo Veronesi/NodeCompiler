@@ -1,11 +1,89 @@
 "use strict";
 const producciones = require('../config/producciones');
-const Arbol = require('../models/Arbol');
+//const Arbol = require('../models/Arbol');
+Object.prototype.next = function () {
+    let element;
+    this.childs.forEach(e => {
+        if (element === undefined) {
+            if (typeof e === 'string') {
+                if (e !== 'EPSILON') {
+                    element = e;
+                }
+            } else {
+                switch (e.name) {
+                    case 'Arbol':
+                        if (!e.isComplete()) {
+                            console.log('el arbol no esta completo');
+                            element = e.next();
+                        }
+                        break;
+                    case 'Produccion':
+                        element = e;
+                        console.log('es una produccion:');
+                        console.table(element);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    });
+    return element;
+};
+
+Object.prototype.isComplete = function () {
+    /** VER ESTO */
+    const isFull = this.childs.some(e => {
+        if(typeof e === 'string' && e !== 'EPSILON'){
+            return true;
+        }else{
+            switch (e.name) {
+                case 'Token':
+                    return false;
+                case 'Produccion':
+                    return false;
+                case 'Arbol':
+                    return e.isComplete();
+                default:
+                    break;
+            }
+        }
+    });
+    return isFull;
+};
+
+Object.prototype.first = function () {
+    return this.produce[0];
+};
+
+Object.prototype.setChild = function (newChild) {
+    let isFollow = true;
+    this.childs.forEach((e, index) => {
+        if (typeof e === 'string' && isFollow) {
+            if (e !== 'EPSILON') {
+                isFollow = false;
+                this.childs[index] = newChild;
+            }
+        } else {
+            if (e.name === 'Arbol' && isFollow) {
+                if (!e.isComplete()) {
+                    console.log('el arbol no esta completo');
+                    e.setChild(newChild);
+                }
+            } else if (e.name === 'Produccion') {
+                console.log('reemplazando la produccion por un arbol...');
+                isFollow = false;
+                this.childs[index] = newChild;
+            }
+        }
+    });
+};
+
 module.exports = class AnalisisSintactico {
     constructor() {
         this.name = this.constructor.name;
         this.tokens = [];
-        
+
         // lista de Arboles que falta procesar.
         this.produccion = [];
 
@@ -19,7 +97,7 @@ module.exports = class AnalisisSintactico {
 
         this.produccion = listProductions.map(e => {
             e.produce[0] = element;
-            return new Arbol({ node: e.produccion, childs: e.produce });
+            return ({ node: e.produccion, childs: e.produce, name: 'Arbol' });
         });
         console.table(this.produccion);
     }
@@ -33,7 +111,7 @@ module.exports = class AnalisisSintactico {
         try {
             switch (element.name) {
                 case 'Token':
-                    const prod = producciones.filter(e => element.type === e.slice());
+                    const prod = producciones.filter(e => element.type === e.first());
                     if (prod.length) {
                         return prod;
                     } else {
@@ -49,28 +127,29 @@ module.exports = class AnalisisSintactico {
         }
     }
 
-    getProduce(production){
+    getProduce(production) {
         return producciones.filter(e => production === e.produccion);
     }
 
     checkElement(element, production) {
+
         const child = production.next();
-        if(/^[<]/.test(child)){
+        if (/^[<]/.test(child)) {
             console.log(`elemento a analizar: ${child}`);
             // Produccion
             return this.getProduce(child);
-        }else if(typeof child === 'string'){
+        } else if (typeof child === 'string') {
             console.log(`elemento a analizar: ${child}`);
             // Palabra
-            if(child === element.type){
+            if (child === element.type) {
                 return element;
-            }else{
+            } else {
                 console.log('la produccion no sirve');
                 return undefined;
             }
-        }else if(child.name === 'Produccion'){
+        } else if (child.name === 'Produccion') {
             console.log(`elemento a analizar: ${child.produccion} => ${child.produce}`);
-            return new Arbol({node: child.produccion,childs: child.produce});
+            return ({ node: child.produccion, childs: child.produce, name: 'Arbol' });
         }
     }
 
@@ -78,24 +157,28 @@ module.exports = class AnalisisSintactico {
         const _this = this;
         let isFollow = true;
         let newProductions = [];
-        this.produccion.forEach( (e, index) => {
+        this.produccion.forEach((e, index) => {
             const newChild = _this.checkElement(element, e);
-            if(newChild.name === undefined){
-                isFollow = false;
-                newChild.forEach(item => {
-                    console.log(JSON.stringify(_this.produccion[index]));
-                    let newProduction = Object.create(this.produccion[index]);
-                    newProduction.setChild(item);
-                    newProductions.push(newProduction);
-                });
-            }else{
-                let newProduction = Object.create(this.produccion[index]);
-                newProduction.setChild(newChild);
-                if(newChild.name === 'Token'){
-                    _this.stackProduction.push(newProduction);
-                }else{
+            if (typeof newChild !== 'undefined') {
+                if (newChild.name === undefined) {
                     isFollow = false;
-                    newProductions.push(newProduction);
+                    newChild.forEach(item => {
+                        let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
+                        newProduction.setChild(item);
+                        newProductions.push(newProduction);
+                    });
+                } else {
+                    let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
+                    newProduction.setChild(newChild);
+                    console.log(JSON.stringify(newProduction, null, 1));
+
+
+                    if (newChild.name === 'Token') {
+                        _this.stackProduction.push(newProduction);
+                    } else {
+                        isFollow = false;
+                        newProductions.push(newProduction);
+                    }
                 }
             }
         });
@@ -119,12 +202,23 @@ module.exports = class AnalisisSintactico {
 
         let element = this.tokens.shift();
         const isFollow = this.checkProductions(element);
+        console.log('1-------');
         console.table(this.produccion);
         console.table(this.stackProduction);
-        if(!isFollow){
+        if (!isFollow) {
             this.checkProductions(element);
         }
-        
+        console.log('2-------');
+        console.table(this.produccion);
+        console.table(this.stackProduction);
+        if (!isFollow) {
+            this.checkProductions(element);
+        }
+        console.log('3-------');
+        console.table(this.produccion);
+        console.table(this.stackProduction);
+        //console.log(JSON.stringify(this.produccion, null, 2));
+        //console.log(JSON.stringify(this.stackProduction, null, 2));
         fun();
     }
 };

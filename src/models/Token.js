@@ -1,10 +1,12 @@
 "use strict";
-module.exports = class Token {
+module.exports = {
     constructor(args){
         const { element = "", type= "", line = 0 } = args;
-        this.name = this.constructor.name;
-        this.element = element;
-        this.type = type;
-        this.line = line;
+        return {
+            name : 'Token',
+            element : element,
+            type : type,
+            line : line,
+        };
     }
 };
