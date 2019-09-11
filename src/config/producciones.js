@@ -1,6 +1,6 @@
 "use strict";
 const Porduccion = require('../models/Produccion');
-const caracter = [
+const producciones = [
     new Porduccion({produccion: '<Programa>',                     produce: ['<Sentencia>', 'PUNTOYCOMA', '<ProgramaFin>']}),
     new Porduccion({produccion: '<ProgramaFin>',                  produce: ['<Sentencia>', 'PUNTOYCOMA', '<Programa>']}),
     new Porduccion({produccion: '<ProgramaFin>',                  produce: ['EPSILON']}),
@@ -14,4 +14,4 @@ const caracter = [
     new Porduccion({produccion: '<ExpresionAritmeticaFinal>',     produce: ['EPSILON']}),
 ];
 
-module.exports = caracter;
+module.exports = producciones;

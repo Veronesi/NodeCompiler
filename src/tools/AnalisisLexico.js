@@ -108,7 +108,7 @@ module.exports = class AnalisisLexico {
      * @returns {[Token]} Lista de tokens
      */
     start(args, fun){
-        const { filename = 'non_file_name', debug = false, scan = true } = args;
+        const { filename = 'non_file_name'/*, debug = false */, scan = true } = args;
         if(scan){
             this.import(filename);
             this.getLines();
