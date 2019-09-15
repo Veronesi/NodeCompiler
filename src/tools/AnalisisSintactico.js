@@ -1,6 +1,6 @@
 "use strict";
+const colors = require('colors/safe');
 const producciones = require('../config/producciones');
-//const Arbol = require('../models/Arbol');
 Object.prototype.next = function () {
     let element;
     this.childs.forEach(e => {
@@ -12,15 +12,15 @@ Object.prototype.next = function () {
             } else {
                 switch (e.name) {
                     case 'Arbol':
-                        if (!e.isComplete()) {
-                            console.log('el arbol no esta completo');
-                            element = e.next();
+                        if (e.hasSpace()) {
+                            const newE = e.next();
+                            if (newE) {
+                                element = newE;
+                            }
                         }
                         break;
                     case 'Produccion':
                         element = e;
-                        console.log('es una produccion:');
-                        console.table(element);
                         break;
                     default:
                         break;
@@ -31,19 +31,76 @@ Object.prototype.next = function () {
     return element;
 };
 
-Object.prototype.isComplete = function () {
-    /** VER ESTO */
+Object.prototype.showTree = function (init = '', spaces = '') {
+    console.log(init + colors.cyan(this.node));
+    if (this.childs.length) {
+        this.childs.forEach((element, index) => {
+            if (typeof element === 'string') {
+                if (element !== 'EPSILON') {
+                    if (/^[<]/.test(element)) {
+                        if (this.childs.length - 1 === index) {
+                            console.log(spaces + '└──' + colors.blue(element));
+                        } else {
+                            console.log(spaces + '├──' + colors.blue(element));
+                        }
+                    } else {
+                        if (this.childs.length - 1 === index) {
+                            console.log(spaces + '└──' + colors.white(element));
+                        } else {
+                            console.log(spaces + '├──' + colors.white(element));
+                        }
+                    }
+
+                } else {
+                    if (this.childs.length - 1 === index) {
+                        console.log(spaces + '└──' + colors.gray(element));
+                    } else {
+                        console.log(spaces + '├──' + colors.gray(element));
+                    }
+                }
+            }
+            switch (element.name) {
+                case 'Token':
+                    if (this.childs.length - 1 === index) {
+                        console.log(spaces + '└──' + colors.yellow(element.type));
+                    } else {
+                        console.log(spaces + '├──' + colors.yellow(element.type));
+                    }
+                    break;
+                case 'Arbol':
+                    if (this.childs.length - 1 === index) {
+                        element.showTree(spaces + '└──', spaces + '   ');
+                    } else {
+                        element.showTree(spaces + '├──', spaces + '│  ');
+                    }
+
+                    break;
+                case 'Produccion':
+                    if (this.childs.length - 1 === index) {
+                        console.log(spaces + '└──' + colors.green(element.produccion + ' [' + element.produce + ']'));
+                    } else {
+                        console.log(spaces + '├──' + colors.green(element.produccion + ' [' + element.produce + ']'));
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+};
+
+Object.prototype.hasSpace = function () {
     const isFull = this.childs.some(e => {
-        if(typeof e === 'string' && e !== 'EPSILON'){
+        if (typeof e === 'string' && e !== 'EPSILON') {
             return true;
-        }else{
+        } else {
             switch (e.name) {
                 case 'Token':
                     return false;
                 case 'Produccion':
-                    return false;
+                    return true;
                 case 'Arbol':
-                    return e.isComplete();
+                    return e.hasSpace();
                 default:
                     break;
             }
@@ -56,6 +113,15 @@ Object.prototype.first = function () {
     return this.produce[0];
 };
 
+Object.prototype.existInProduce = function (element) {
+    return this.produce.some(e => e === element);
+};
+
+Object.prototype.positionInProduce = function (element) {
+    const position = this.produce.findIndex(e => e === element);
+    return position;
+};
+
 Object.prototype.setChild = function (newChild) {
     let isFollow = true;
     this.childs.forEach((e, index) => {
@@ -66,12 +132,10 @@ Object.prototype.setChild = function (newChild) {
             }
         } else {
             if (e.name === 'Arbol' && isFollow) {
-                if (!e.isComplete()) {
-                    console.log('el arbol no esta completo');
+                if (e.hasSpace()) {
                     e.setChild(newChild);
                 }
             } else if (e.name === 'Produccion') {
-                console.log('reemplazando la produccion por un arbol...');
                 isFollow = false;
                 this.childs[index] = newChild;
             }
@@ -88,7 +152,7 @@ module.exports = class AnalisisSintactico {
         this.produccion = [];
 
         // Lista de Arboles procesadas.
-        this.stackProduction = [];
+        this.stackProductionReady = [];
     }
 
     initTree() {
@@ -99,7 +163,6 @@ module.exports = class AnalisisSintactico {
             e.produce[0] = element;
             return ({ node: e.produccion, childs: e.produce, name: 'Arbol' });
         });
-        console.table(this.produccion);
     }
 
     /**
@@ -111,16 +174,24 @@ module.exports = class AnalisisSintactico {
         try {
             switch (element.name) {
                 case 'Token':
-                    const prod = producciones.filter(e => element.type === e.first());
+                    const _producciones = JSON.parse((JSON.stringify(producciones)));
+                    const prod = _producciones.filter(e => element.type === e.first());
                     if (prod.length) {
                         return prod;
                     } else {
                         throw new Error(`ERROR: doesn't exist element to produce '${element.element}' on line ${element.line}`);
                     }
                     break;
-
                 default:
-                    throw new Error(`ERROR: type element doesn't exist on line ${element.line}`);
+                    //const prod2 = producciones.filter(e => element === e.first());
+                    const _producciones2 = JSON.parse((JSON.stringify(producciones)));
+                    const prod2 = _producciones2.filter(e => e.existInProduce(element));
+                    if (prod2.length) {
+                        return prod2;
+                    } else {
+                        return;
+                    }
+                    break;
             }
         } catch (error) {
             console.log(error.message);
@@ -128,62 +199,79 @@ module.exports = class AnalisisSintactico {
     }
 
     getProduce(production) {
-        return producciones.filter(e => production === e.produccion);
+        const _producciones = JSON.parse((JSON.stringify(producciones)));
+        const productions = _producciones.filter(e => production === e.produccion);
+        return productions;
     }
 
     checkElement(element, production) {
-
         const child = production.next();
         if (/^[<]/.test(child)) {
-            console.log(`elemento a analizar: ${child}`);
             // Produccion
-            return this.getProduce(child);
+            const produce = this.getProduce(child);
+            return produce;
         } else if (typeof child === 'string') {
-            console.log(`elemento a analizar: ${child}`);
             // Palabra
             if (child === element.type) {
                 return element;
             } else {
-                console.log('la produccion no sirve');
-                return undefined;
+                return;
             }
         } else if (child.name === 'Produccion') {
-            console.log(`elemento a analizar: ${child.produccion} => ${child.produce}`);
             return ({ node: child.produccion, childs: child.produce, name: 'Arbol' });
         }
     }
 
-    checkProductions(element) {
+    checkProductions(token) {
         const _this = this;
-        let isFollow = true;
         let newProductions = [];
-        this.produccion.forEach((e, index) => {
-            const newChild = _this.checkElement(element, e);
-            if (typeof newChild !== 'undefined') {
-                if (newChild.name === undefined) {
-                    isFollow = false;
-                    newChild.forEach(item => {
+        this.produccion.forEach((oneProduction, index) => {
+            if (oneProduction.hasSpace()) {
+                const newChild = _this.checkElement(token, oneProduction);
+                if (newChild !== undefined) {
+                    if (newChild.length) {
+                        // newChild is an array
+                        newChild.forEach(elementNewChild => {
+                            let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
+                            newProduction.setChild(elementNewChild);
+                            newProductions.push(newProduction);
+                        });
+                    } else {
                         let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
-                        newProduction.setChild(item);
+                        newProduction.setChild(newChild);
+                        if (newChild.name === 'Token') {
+                            _this.stackProductionReady.push(newProduction);
+                        } else {
+                            newProductions.push(newProduction);
+                        }
+                    }
+                }
+            } else {
+                // Tree is full
+                let newsRoots = this.getProduction(oneProduction.node);
+                if (newsRoots) {
+                    newsRoots.forEach(newsProduccion => {
+                        newsProduccion.produce[newsProduccion.positionInProduce(oneProduction.node)] = oneProduction;
+                        let newProduction = {
+                            node: newsProduccion.produccion,
+                            childs: newsProduccion.produce,
+                            name: 'Arbol'
+                        };
                         newProductions.push(newProduction);
                     });
-                } else {
-                    let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
-                    newProduction.setChild(newChild);
-                    console.log(JSON.stringify(newProduction, null, 1));
-
-
-                    if (newChild.name === 'Token') {
-                        _this.stackProduction.push(newProduction);
-                    } else {
-                        isFollow = false;
-                        newProductions.push(newProduction);
-                    }
                 }
             }
         });
         this.produccion = newProductions;
-        return isFollow;
+    }
+
+    scan() {
+        let nextToken = this.tokens.shift();
+        while (this.produccion.length) {
+            this.checkProductions(nextToken);
+        }
+        this.produccion = this.stackProductionReady;
+        this.stackProductionReady = [];
     }
 
     /**
@@ -200,25 +288,14 @@ module.exports = class AnalisisSintactico {
         this.tokens = tokens;
         this.initTree();
 
-        let element = this.tokens.shift();
-        const isFollow = this.checkProductions(element);
-        console.log('1-------');
-        console.table(this.produccion);
-        console.table(this.stackProduction);
-        if (!isFollow) {
-            this.checkProductions(element);
+        while (this.tokens.length) {
+            this.scan();
         }
-        console.log('2-------');
-        console.table(this.produccion);
-        console.table(this.stackProduction);
-        if (!isFollow) {
-            this.checkProductions(element);
-        }
-        console.log('3-------');
-        console.table(this.produccion);
-        console.table(this.stackProduction);
-        //console.log(JSON.stringify(this.produccion, null, 2));
-        //console.log(JSON.stringify(this.stackProduction, null, 2));
         fun();
+        console.log('********Arbol sintactico**********');
+        this.produccion.forEach(e => {
+            e.showTree();
+            console.log('--     --      ---    --   ---   ');
+        });
     }
 };
