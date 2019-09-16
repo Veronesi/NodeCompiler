@@ -1,30 +1,33 @@
 "use strict";
 const colors = require('colors/safe');
 const producciones = require('../config/producciones');
+const debug = true;
+function show(text){
+    (debug) ? console.log(text) : null;
+}
+
+/**
+ * Devuelve el proximo elemento que puede ser reemplazado.
+ * @returns { string | Proiduccion }
+ */
 Object.prototype.next = function () {
     let element;
     this.childs.forEach(e => {
-        if (element === undefined) {
-            if (typeof e === 'string') {
-                if (e !== 'EPSILON') {
+        if (element !== undefined) { return; }
+
+        if (typeof e === 'string') {
+            if (e !== 'EPSILON') { element = e; }
+        } else {
+            switch (e.name) {
+                case 'Arbol':
+                    if (e.hasSpace()) {
+                        const newE = e.next();
+                        if (newE) { element = newE; }
+                    }
+                    break;
+                case 'Produccion':
                     element = e;
-                }
-            } else {
-                switch (e.name) {
-                    case 'Arbol':
-                        if (e.hasSpace()) {
-                            const newE = e.next();
-                            if (newE) {
-                                element = newE;
-                            }
-                        }
-                        break;
-                    case 'Produccion':
-                        element = e;
-                        break;
-                    default:
-                        break;
-                }
+                    break;
             }
         }
     });
@@ -62,9 +65,9 @@ Object.prototype.showTree = function (init = '', spaces = '') {
             switch (element.name) {
                 case 'Token':
                     if (this.childs.length - 1 === index) {
-                        console.log(spaces + '└──' + colors.yellow(element.type));
+                        console.log(spaces + '└──' + colors.yellow(element.type) + ` '${element.element}'`);
                     } else {
-                        console.log(spaces + '├──' + colors.yellow(element.type));
+                        console.log(spaces + '├──' + colors.yellow(element.type) + ` '${element.element}'`);
                     }
                     break;
                 case 'Arbol':
@@ -89,6 +92,10 @@ Object.prototype.showTree = function (init = '', spaces = '') {
     }
 };
 
+/**
+ * Verifica si hay espacio para un nuevo elemento en el arbol
+ * @returns {Boolean}
+ */
 Object.prototype.hasSpace = function () {
     const isFull = this.childs.some(e => {
         if (typeof e === 'string' && e !== 'EPSILON') {
@@ -122,6 +129,9 @@ Object.prototype.positionInProduce = function (element) {
     return position;
 };
 
+/**
+ * Reemplaza el proximo String o Produccion por un nuevo elemento
+ */
 Object.prototype.setChild = function (newChild) {
     let isFollow = true;
     this.childs.forEach((e, index) => {
@@ -208,16 +218,20 @@ module.exports = class AnalisisSintactico {
         const child = production.next();
         if (/^[<]/.test(child)) {
             // Produccion
+            show(`Elemento a analizar: ${child} (Es un string-produccion)`);
             const produce = this.getProduce(child);
             return produce;
         } else if (typeof child === 'string') {
             // Palabra
             if (child === element.type) {
+                show(`Elemento a analizar: ${child} (Es un String-token)`);
                 return element;
             } else {
+                show(`Elemento a analizar: ${child} (Es un String y no coinciden)`);
                 return;
             }
         } else if (child.name === 'Produccion') {
+            show(`Elemento a analizar: ${child.produccion} (Es una produccion)`);
             return ({ node: child.produccion, childs: child.produce, name: 'Arbol' });
         }
     }
@@ -226,12 +240,16 @@ module.exports = class AnalisisSintactico {
         const _this = this;
         let newProductions = [];
         this.produccion.forEach((oneProduction, index) => {
+            show(colors.bgGreen(`Analizando produccion ${index}...`));
             if (oneProduction.hasSpace()) {
+                show(`Hay espacio en el arbol`);
                 const newChild = _this.checkElement(token, oneProduction);
                 if (newChild !== undefined) {
                     if (newChild.length) {
                         // newChild is an array
+                        show(`hay un array de nuevos hijos`);
                         newChild.forEach(elementNewChild => {
+                            show(`-- hijo: [${elementNewChild.produce}] (${elementNewChild.name})`);
                             let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
                             newProduction.setChild(elementNewChild);
                             newProductions.push(newProduction);
@@ -240,13 +258,16 @@ module.exports = class AnalisisSintactico {
                         let newProduction = JSON.parse((JSON.stringify(this.produccion[index])));
                         newProduction.setChild(newChild);
                         if (newChild.name === 'Token') {
+                            show(`-- hijo: ${newChild.name} (${newChild.type}) "${newChild.element}"`);
                             _this.stackProductionReady.push(newProduction);
                         } else {
+                            show(`-- hijo: ${newChild.name}`);
                             newProductions.push(newProduction);
                         }
                     }
                 }
             } else {
+                show(`No hay espacio en el arbol`);
                 // Tree is full
                 let newsRoots = this.getProduction(oneProduction.node);
                 if (newsRoots) {
@@ -265,15 +286,6 @@ module.exports = class AnalisisSintactico {
         this.produccion = newProductions;
     }
 
-    scan() {
-        let nextToken = this.tokens.shift();
-        while (this.produccion.length) {
-            this.checkProductions(nextToken);
-        }
-        this.produccion = this.stackProductionReady;
-        this.stackProductionReady = [];
-    }
-
     /**
      * 
      * @param {Object} args lista de flags de configuracion:
@@ -289,13 +301,24 @@ module.exports = class AnalisisSintactico {
         this.initTree();
 
         while (this.tokens.length) {
-            this.scan();
+            console.log('********production**********');
+            this.produccion.forEach(e => {
+                e.showTree();
+                console.log('...........................');
+            });
+            let nextToken = this.tokens.shift();
+            show(colors.bgBlue(`Proximo token: ${nextToken.type} '${nextToken.element}'`));
+            while (this.produccion.length) {
+                show(colors.bgCyan(`Analizando producciones...`));
+                this.produccion.forEach(e => {
+                    e.showTree();
+                    console.log('...........................');
+                });
+                this.checkProductions(nextToken);
+            }
+            this.produccion = this.stackProductionReady;
+            this.stackProductionReady = [];
         }
         fun();
-        console.log('********Arbol sintactico**********');
-        this.produccion.forEach(e => {
-            e.showTree();
-            console.log('--     --      ---    --   ---   ');
-        });
     }
 };

@@ -1,3 +1,2 @@
 var1 = 4;
-# hola
-# var2 = var1 + 3;
+var2 = 5 + 6;
