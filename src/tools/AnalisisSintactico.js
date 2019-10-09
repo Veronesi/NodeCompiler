@@ -123,14 +123,14 @@ Object.prototype.first = function () {
 Object.prototype.existInProduce = function (element) {
     let posicionPrimeraPalabra = 99;
     let generaPalabraAntes = false;
-    return this.produce.some( (e, index) => {
-        if(e[0] !== '<' && e !== 'EPSILON'){
-            if(!generaPalabraAntes){
+    return this.produce.some((e, index) => {
+        if (e[0] !== '<' && e !== 'EPSILON') {
+            if (!generaPalabraAntes) {
                 posicionPrimeraPalabra = index;
                 generaPalabraAntes = true;
             }
         }
-        if(e === element && posicionPrimeraPalabra > index){
+        if (e === element && posicionPrimeraPalabra > index) {
             return true;
         }
     });
@@ -218,9 +218,6 @@ module.exports = class AnalisisSintactico {
                     });
 
                     if (prod2.length) {
-                        show('$$$$$$$$$$$$');
-                        prod2.forEach(e => { show(JSON.stringify(e, null, 2)) });
-                        show('$$$$$$$$$$$$');
                         return prod2;
                     } else {
                         return;
@@ -313,6 +310,52 @@ module.exports = class AnalisisSintactico {
     }
 
     /**
+     * fuerza a la produccione para que sea generada por el nodo raiz si es posible.
+     * 
+     */
+    rootearProduccion(production) {
+        // Verificamos si ya esta rooteado
+        /**
+         * @todo Cambiar '<Programa>' por una cte.
+         */
+        if (production.node === '<Programa>') {
+            show('la produccion ya esta rooteada');
+            this.stackProductionRooted.push(production);
+            return;
+        } else {
+            // Buscamos quienes lo produce
+            let e = producciones.filter(e => {
+                const position = e.produce.indexOf(production.node);
+                const positionFirstString =  e.produce.findIndex(f => (f[0] !== '<' && f[0] !== 'EPSILON'));
+                if (position > -1 && (positionFirstString === -1 || positionFirstString > position)) {
+                    let newsRoots = this.getProduction(production.node);
+                    if (newsRoots) {
+                        newsRoots.forEach(newsProduccion => {
+                            newsProduccion.produce[newsProduccion.positionInProduce(oneProduction.node)] = oneProduction;
+                            let newProduction = {
+                                node: newsProduccion.produccion,
+                                childs: newsProduccion.produce,
+                                name: 'Arbol'
+                            };
+                            this.stackProductionotRouted.push(newProduction);
+                        });
+                    }
+                    return true;
+                }
+            });
+        }
+    }
+
+    CompletarProduccion(production){
+        if(production.hasSpace()){
+            show('hola');
+            show(production.next());
+        }else{
+            show('la produccion ya esta completa');
+        }
+    }
+
+    /**
      * 
      * @param {Object} args lista de flags de configuracion:
      *                      - tokens: lista de tokens en formato de Array
@@ -327,7 +370,7 @@ module.exports = class AnalisisSintactico {
         this.initTree();
 
         while (this.tokens.length) {
-            console.log('********production**********');
+            show('********production**********');
             this.produccion.forEach(e => {
                 e.showTree();
                 console.log('...........................');
@@ -338,17 +381,41 @@ module.exports = class AnalisisSintactico {
                 show(colors.bgCyan(`Analizando producciones...`));
                 this.produccion.forEach(e => {
                     e.showTree();
-                    console.log('...........................');
+                    show('...........................');
                 });
                 this.checkProductions(nextToken);
             }
             this.produccion = this.stackProductionReady;
             this.stackProductionReady = [];
         }
-        show(colors.bgYellow('++++++Finalizada++++++++'));
         this.produccion.forEach(e => {
             e.showTree();
         });
+
+        show('********Verficiamos que sean generados por el nodo raiz**********');
+        this.stackProductionRooted = [];
+        this.stackProductionotRouted = [];
+        while(this.produccion.length){
+
+            this.produccion.forEach(e=>{
+                this.rootearProduccion(e);
+            });
+
+            this.produccion = this.stackProductionotRouted;
+            this.stackProductionotRouted = [];
+        }
+        this.produccion = this.stackProductionRooted;
+        show('********Rooteados**********');
+        this.produccion.forEach(e => {
+            e.showTree();
+        });
+
+        show('********Verficiamos que el arbol este completo**********');
+        this.stackProductionFull = [];
+        this.stackProductionotFull = [];   
+
+        this.CompletarProduccion(this.produccion[0]);
+
         fun();
     }
 };
