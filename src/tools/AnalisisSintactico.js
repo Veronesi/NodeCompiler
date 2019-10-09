@@ -2,7 +2,7 @@
 const colors = require('colors/safe');
 const producciones = require('../config/producciones');
 const debug = true;
-function show(text){
+function show(text) {
     (debug) ? console.log(text) : null;
 }
 
@@ -121,7 +121,19 @@ Object.prototype.first = function () {
 };
 
 Object.prototype.existInProduce = function (element) {
-    return this.produce.some(e => e === element);
+    let posicionPrimeraPalabra = 99;
+    let generaPalabraAntes = false;
+    return this.produce.some( (e, index) => {
+        if(e[0] !== '<' && e !== 'EPSILON'){
+            if(!generaPalabraAntes){
+                posicionPrimeraPalabra = index;
+                generaPalabraAntes = true;
+            }
+        }
+        if(e === element && posicionPrimeraPalabra > index){
+            return true;
+        }
+    });
 };
 
 Object.prototype.positionInProduce = function (element) {
@@ -144,6 +156,7 @@ Object.prototype.setChild = function (newChild) {
             if (e.name === 'Arbol' && isFollow) {
                 if (e.hasSpace()) {
                     e.setChild(newChild);
+                    isFollow = false;
                 }
             } else if (e.name === 'Produccion') {
                 isFollow = false;
@@ -195,8 +208,19 @@ module.exports = class AnalisisSintactico {
                 default:
                     //const prod2 = producciones.filter(e => element === e.first());
                     const _producciones2 = JSON.parse((JSON.stringify(producciones)));
-                    const prod2 = _producciones2.filter(e => e.existInProduce(element));
+                    const prod2 = _producciones2.filter(e => {
+                        if (e.existInProduce(element)) {
+                            // Filtrar que no genere un string antes 
+
+                            show(`position of index: ${e.produce.indexOf(element)}`);
+                            return true;
+                        }
+                    });
+
                     if (prod2.length) {
+                        show('$$$$$$$$$$$$');
+                        prod2.forEach(e => { show(JSON.stringify(e, null, 2)) });
+                        show('$$$$$$$$$$$$');
                         return prod2;
                     } else {
                         return;
@@ -228,6 +252,7 @@ module.exports = class AnalisisSintactico {
                 return element;
             } else {
                 show(`Elemento a analizar: ${child} (Es un String y no coinciden)`);
+                show(colors.red('Descartar arbol'));
                 return;
             }
         } else if (child.name === 'Produccion') {
@@ -259,6 +284,7 @@ module.exports = class AnalisisSintactico {
                         newProduction.setChild(newChild);
                         if (newChild.name === 'Token') {
                             show(`-- hijo: ${newChild.name} (${newChild.type}) "${newChild.element}"`);
+                            show(colors.green('Produccion lista'));
                             _this.stackProductionReady.push(newProduction);
                         } else {
                             show(`-- hijo: ${newChild.name}`);
@@ -319,6 +345,10 @@ module.exports = class AnalisisSintactico {
             this.produccion = this.stackProductionReady;
             this.stackProductionReady = [];
         }
+        show(colors.bgYellow('++++++Finalizada++++++++'));
+        this.produccion.forEach(e => {
+            e.showTree();
+        });
         fun();
     }
 };
