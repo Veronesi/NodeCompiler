@@ -1,9 +1,9 @@
 "use strict";
 const colors = require('colors/safe');
 const producciones = require('../config/producciones');
-const debug = true;
-function show(text) {
-    (debug) ? console.log(text) : null;
+const debug = false;
+function show(text, force = false) {
+    (debug || force) ? console.log(text) : null;
 }
 
 /**
@@ -34,55 +34,55 @@ Object.prototype.next = function () {
     return element;
 };
 
-Object.prototype.showTree = function (init = '', spaces = '') {
-    console.log(init + colors.cyan(this.node));
+Object.prototype.showTree = function (init = '', spaces = '', force = false) {
+    show(init + colors.cyan(this.node), force);
     if (this.childs.length) {
         this.childs.forEach((element, index) => {
             if (typeof element === 'string') {
                 if (element !== 'EPSILON') {
                     if (/^[<]/.test(element)) {
                         if (this.childs.length - 1 === index) {
-                            console.log(spaces + '└──' + colors.blue(element));
+                            show(spaces + '└──' + colors.blue(element), force);
                         } else {
-                            console.log(spaces + '├──' + colors.blue(element));
+                            show(spaces + '├──' + colors.blue(element), force);
                         }
                     } else {
                         if (this.childs.length - 1 === index) {
-                            console.log(spaces + '└──' + colors.white(element));
+                            show(spaces + '└──' + colors.white(element), force);
                         } else {
-                            console.log(spaces + '├──' + colors.white(element));
+                            show(spaces + '├──' + colors.white(element), force);
                         }
                     }
 
                 } else {
                     if (this.childs.length - 1 === index) {
-                        console.log(spaces + '└──' + colors.gray(element));
+                        show(spaces + '└──' + colors.gray(element), force);
                     } else {
-                        console.log(spaces + '├──' + colors.gray(element));
+                        show(spaces + '├──' + colors.gray(element), force);
                     }
                 }
             }
             switch (element.name) {
                 case 'Token':
                     if (this.childs.length - 1 === index) {
-                        console.log(spaces + '└──' + colors.yellow(element.type) + ` '${element.element}'`);
+                        show(spaces + '└──' + colors.yellow(element.type) + ` '${element.element}'`, force);
                     } else {
-                        console.log(spaces + '├──' + colors.yellow(element.type) + ` '${element.element}'`);
+                        show(spaces + '├──' + colors.yellow(element.type) + ` '${element.element}'`, force);
                     }
                     break;
                 case 'Arbol':
                     if (this.childs.length - 1 === index) {
-                        element.showTree(spaces + '└──', spaces + '   ');
+                        element.showTree(spaces + '└──', spaces + '   ', force);
                     } else {
-                        element.showTree(spaces + '├──', spaces + '│  ');
+                        element.showTree(spaces + '├──', spaces + '│  ', force);
                     }
 
                     break;
                 case 'Produccion':
                     if (this.childs.length - 1 === index) {
-                        console.log(spaces + '└──' + colors.green(element.produccion + ' [' + element.produce + ']'));
+                        show(spaces + '└──' + colors.green(element.produccion + ' [' + element.produce + ']'), force);
                     } else {
-                        console.log(spaces + '├──' + colors.green(element.produccion + ' [' + element.produce + ']'));
+                        show(spaces + '├──' + colors.green(element.produccion + ' [' + element.produce + ']'), force);
                     }
                     break;
                 default:
@@ -225,7 +225,7 @@ module.exports = class AnalisisSintactico {
                     break;
             }
         } catch (error) {
-            console.log(error.message);
+            show(error.message);
         }
     }
 
@@ -252,6 +252,28 @@ module.exports = class AnalisisSintactico {
                 show(colors.red('Descartar arbol'));
                 return;
             }
+        } else if (child.name === 'Produccion') {
+            show(`Elemento a analizar: ${child.produccion} (Es una produccion)`);
+            return ({ node: child.produccion, childs: child.produce, name: 'Arbol' });
+        }
+    }
+
+    forceEpsilon(child){
+        if (/^[<]/.test(child)) {
+            // Produccion
+            show(`Elemento a analizar: ${child} (Es un string-produccion)`);
+            let newChild = this.getProduce(child).filter(unaProduccion => unaProduccion.produce.every(e => /^<|EPSILON/.test(e)));
+            if(newChild.length){
+                return newChild;
+            }else{
+                show('ninguna de las nuevas producciones sirve');
+                return false;
+            }
+        } else if (typeof child === 'string') {
+            // Palabra
+                show(`Elemento a analizar: ${child} (Es un String-token)`);
+                return child;
+            
         } else if (child.name === 'Produccion') {
             show(`Elemento a analizar: ${child.produccion} (Es una produccion)`);
             return ({ node: child.produccion, childs: child.produce, name: 'Arbol' });
@@ -348,10 +370,36 @@ module.exports = class AnalisisSintactico {
 
     CompletarProduccion(production){
         if(production.hasSpace()){
-            show('hola');
-            show(production.next());
+            // Obtenemos el proximo elemento
+            let newChild = this.forceEpsilon(production.next());
+            if(newChild){
+                if(newChild.length){
+                    newChild.forEach(elementNewChild => {
+                        show(`-- hijo: [${elementNewChild.produce}] (${elementNewChild.name})`);
+                        let newProduction = JSON.parse((JSON.stringify(production)));
+                        newProduction.setChild(elementNewChild);
+                        this.stackProductionotFull.push(newProduction);
+                        newProduction.showTree();
+                    });
+                }else{
+                    let newProduction = JSON.parse((JSON.stringify(production)));
+                    newProduction.setChild(newChild);
+                    if (newChild.name === 'Token') {
+                        show(`-- hijo: ${newChild.name} (${newChild.type}) "${newChild.element}"`);
+                        show(colors.green('Produccion lista'));
+                        this.stackProductionFull.push(newProduction);
+                    } else {
+                        show(`-- hijo: ${newChild.name}`);
+                        this.stackProductionotFull.push(newProduction);
+                    }
+                    newProduction.showTree();
+                }
+            }else{
+                show('err newChild');
+            }
         }else{
             show('la produccion ya esta completa');
+            this.stackProductionReady.push(production);
         }
     }
 
@@ -373,7 +421,7 @@ module.exports = class AnalisisSintactico {
             show('********production**********');
             this.produccion.forEach(e => {
                 e.showTree();
-                console.log('...........................');
+                show('...........................');
             });
             let nextToken = this.tokens.shift();
             show(colors.bgBlue(`Proximo token: ${nextToken.type} '${nextToken.element}'`));
@@ -412,10 +460,19 @@ module.exports = class AnalisisSintactico {
 
         show('********Verficiamos que el arbol este completo**********');
         this.stackProductionFull = [];
-        this.stackProductionotFull = [];   
+        this.stackProductionotFull = [];
+        this.stackProductionReady = [];
+        while(this.produccion.length){
 
-        this.CompletarProduccion(this.produccion[0]);
+            this.produccion.forEach(e=>{
+                this.CompletarProduccion(e);
+            });
 
+            this.produccion = this.stackProductionotFull;
+            this.stackProductionotFull = [];
+        }
+        this.produccion = this.stackProductionFull;
+        this.stackProductionReady[0].showTree('', '', true);
         fun();
     }
 };
