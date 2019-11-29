@@ -1,41 +1,57 @@
 "use strict";
+
 const fs = require('fs');
 const Caracteres = require('../config/caracteres');
 const PalabrasReservadas = require('../config/palabrasReservadas');
 const expReg = require('./expReg');
+
+/**
+ * @class AnalisisLexico
+ * @description limpia el codigo y agrupa los componentes lexicos, ademas de comprobar que los simbolos se escribieron correctamente.
+ * @var {String} fileName nombre del archivo a analizar
+ * @var {Array} lines codigo fuente separado linea a linea en un arreglo 
+ * @var {String} name nombre de la clase
+ * @var {String} planeText 
+ * @var {Array} tokens
+ */
 module.exports = class AnalisisLexico {
+
     constructor(){
+        this.fileName = "";
+        this.lines = [];
         this.name = this.constructor.name;
-        this.line = [];
+        this.planeText = "";
+        this.tokens = [];
     }
+
     /**
      * @description Lee el archivo pasado por parametro y lo guarda en la variable text
-     * @param {String} filename 
+     * @param {String} fileName 
      * @requires fs
      */
-    import(filename){
-        this.filename = filename;
-        this.text = fs.readFileSync(`./src/public/${this.filename}`,'utf8');
-    }
-
-    getFileName(){
-        console.log(this.filename);
+    importFromFile(fileName){
+        this.fileName = fileName;
+        this.planeText = fs.readFileSync(`./src/public/${this.fileName}`,'utf8');
     }
 
     /**
-     * analiza el text y genera un array con cada linea del archivo leido
+     * @description analiza una cadena de texto y genera un arreglo con cada linea del archivo leido limpiada.
+     * @todo realizar un metodo para borrar los comentarios multilineas
      */
-    getLines(){
-        let exp = this.text.match(/(.*)/g).filter(e => e.length > 0);
-        for(let i = 0; i < exp.length; i+=1){
-            if(!/^\s*\#/.test(exp[i])){
-                this.line.push({line: exp[i], number: i+1});
+    generateLines(){
+        // Evita las lineas vacias.
+        let linesWoEmptyLines = this.planeText.match(expReg.line).filter(textLine => textLine.length > 0);
+
+        for(let i = 0; i < linesWoEmptyLines.length; i+=1){
+            // Evita los comentarios se una linea
+            if(!expReg.comentario.test(linesWoEmptyLines[i])){
+                this.lines.push({line: linesWoEmptyLines[i], number: i+1});
             }
         }
     }
 
     analizarLineas(){
-        let tokens = this.line.map( e => {
+        let tokens = this.lines.map( e => {
             let texto = e.line;
             let token = [];
             while(texto.length > 0){
@@ -66,6 +82,7 @@ module.exports = class AnalisisLexico {
         });
         this.tokens = tokens.reduce((acc, val) => acc.concat(val), []);
     }
+
 
     /**
      * @description devuelve el tipo de elemento que es
@@ -100,21 +117,20 @@ module.exports = class AnalisisLexico {
 
     /**
      * Inicia un analisis lexico
-     * @param {{fillename: String, debug: Boolean, scan: Boolean}} args   flags del analisis:
-     *                          - filename: nombre del archivo de codigo fuente
-     *                          - debug: Mostrar por consola el procedimiento.
-     *                          - scan: Ejecutar el analisis automaticamente.
-     * @param {function} fun Ejecuta al funcion al terminar el analisis.
-     * @returns {[Token]} Lista de tokens
+     * @param {{fileName: String, debug: Boolean, scan: Boolean}} args flags del analisis:
+     *      - fileName : nombre del archivo de codigo fuente
+     *      - debug: Mostrar por consola el procedimiento.
+     *      - scan: Ejecutar el analisis automaticamente.
+     * @param {function} success Ejecuta al funcion al terminar el analisis.
+     * @returns {Array} arreglo de tokens
      */
-    start(args, fun){
-        const { filename = 'non_file_name'/*, debug = false */, scan = true } = args;
+    start(args, success = () => {}){
+        const { fileName = 'non_file_name', scan = true } = args;
         if(scan){
-            this.import(filename);
-            this.getLines();
+            this.importFromFile(fileName);
+            this.generateLines();
             this.analizarLineas();
         }
-        fun();
-        return this.tokens;
+        success(this.tokens);
     }
 };

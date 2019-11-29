@@ -8,5 +8,7 @@ const expReg = {
         OPERADOR:  /^[+\-/*]/,
     },
     Espacio: /^\s+/,
+    line: /(.*)/g,
+    comentario: /^\s*\#/,
 };
 module.exports = expReg;
