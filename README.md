@@ -1,5 +1,4 @@
 # NodeCompiler
-Compiler programed in NodeJs
 
 ### Codigo fuente de ejemplo
 
@@ -24,7 +23,7 @@ if(Prim == 0){
 };
 ```
 
-### Tabla de tokens generadad por el Analizador Lexico
+### Tabla de tokens generada por el Analizador Lexico
 
 ```
 ┌─────────┬─────────┬─────────────────────────────────┬──────────────────────┬──────┐
@@ -421,4 +420,291 @@ if(Prim == 0){
                      ├──PUNTOYCOMA ';'
                      └──<Programa>
                         └──EPSILON
+```
+
+## Manejo de errores:
+
+### durante la fase del analizador lexico:
+
+```js
+while(i < 10){
+    readint(Elem);
+    a =$ cons(Elem, A);
+    i = i+1;
+};
+```
+> ***LexicalError***: token no válido o inesperado '***$***' en linea ***3***
+
+### durante la fase del analizador sintactico:
+
+```js
+while(i < 10){
+    readint(Elem);
+    a = cons(Elem, A);
+    i = i+1 [4, 3];
+};
+```
+> ***SyntaxError***: token inesperado \' ***\[***\' en linea ***4***
+
+## Ejemplo de modo debug
+
+```js
+var1 = 5;
+```
+
+```
+********production**********
+<Asignacion>
+├──ID 'var1'
+├──OPERADORASIGNACION
+└──<Expresion>
+...........................
+<ExpresionAritmetica>
+├──ID 'var1'
+└──<ExpresionAritmeticaFinal>
+...........................
+<ExpresionCons>
+├──ID 'var1'
+├──COMA
+└──<ExpresionLista>
+...........................
+<Lista>
+└──ID 'var1'
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero>
+...........................
+<ListaInternaNumero>
+└──ID 'var1'
+...........................
+Proximo token: OPERADORASIGNACION '='
+Analizando producciones...
+<Asignacion>
+├──ID 'var1'
+├──OPERADORASIGNACION
+└──<Expresion>
+...........................
+<ExpresionAritmetica>
+├──ID 'var1'
+└──<ExpresionAritmeticaFinal>
+...........................
+<ExpresionCons>
+├──ID 'var1'
+├──COMA
+└──<ExpresionLista>
+...........................
+<Lista>
+└──ID 'var1'
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero>
+...........................
+<ListaInternaNumero>
+└──ID 'var1'
+...........................
+Analizando produccion 0...
+Hay espacio en el arbol
+Elemento a analizar: OPERADORASIGNACION (Es un String-token)
+-- hijo: Token (OPERADORASIGNACION) "="
+Produccion lista
+Analizando produccion 1...
+Hay espacio en el arbol
+Elemento a analizar: <ExpresionAritmeticaFinal> (Es un string-produccion)
+hay un array de nuevos hijos
+-- hijo: [OPERADOR,<ExpresionAritmetica>] (Produccion)
+-- hijo: [EPSILON] (Produccion)
+Analizando produccion 2...
+Hay espacio en el arbol
+Elemento a analizar: COMA (Es un String y no coinciden)
+Descartar arbol
+Analizando produccion 3...
+No hay espacio en el arbol
+position of index: 0
+Analizando produccion 4...
+Hay espacio en el arbol
+Elemento a analizar: <ListaInternaNumero> (Es un string-produccion)
+hay un array de nuevos hijos
+-- hijo: [COMA,<ListaInterna>] (Produccion)
+-- hijo: [EPSILON] (Produccion)
+-- hijo: [NUMERO] (Produccion)
+-- hijo: [ID] (Produccion)
+Analizando produccion 5...
+No hay espacio en el arbol
+Analizando producciones...
+<ExpresionAritmetica>
+├──ID 'var1'
+└──<ExpresionAritmeticaFinal> [OPERADOR,<ExpresionAritmetica>]
+...........................
+<ExpresionAritmetica>
+├──ID 'var1'
+└──<ExpresionAritmeticaFinal> [EPSILON]
+...........................
+<ExpresionLista>
+└──<Lista>
+   └──ID 'var1'
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero> [COMA,<ListaInterna>]
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero> [EPSILON]
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero> [NUMERO]
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero> [ID]
+...........................
+Analizando produccion 0...
+Hay espacio en el arbol
+Elemento a analizar: <ExpresionAritmeticaFinal> (Es una produccion)
+-- hijo: Arbol
+Analizando produccion 1...
+Hay espacio en el arbol
+Elemento a analizar: <ExpresionAritmeticaFinal> (Es una produccion)
+-- hijo: Arbol
+Analizando produccion 2...
+No hay espacio en el arbol
+position of index: 0
+Analizando produccion 3...
+Hay espacio en el arbol
+Elemento a analizar: <ListaInternaNumero> (Es una produccion)
+-- hijo: Arbol
+Analizando produccion 4...
+Hay espacio en el arbol
+Elemento a analizar: <ListaInternaNumero> (Es una produccion)
+-- hijo: Arbol
+Analizando produccion 5...
+Hay espacio en el arbol
+Elemento a analizar: <ListaInternaNumero> (Es una produccion)
+-- hijo: Arbol
+Analizando produccion 6...
+Hay espacio en el arbol
+Elemento a analizar: <ListaInternaNumero> (Es una produccion)
+-- hijo: Arbol
+Analizando producciones...
+<ExpresionAritmetica>
+├──ID 'var1'
+└──<ExpresionAritmeticaFinal>
+   ├──OPERADOR
+   └──<ExpresionAritmetica>
+...........................
+<ExpresionAritmetica>
+├──ID 'var1'
+└──<ExpresionAritmeticaFinal>
+   └──EPSILON
+...........................
+<Expresion>
+└──<ExpresionLista>
+   └──<Lista>
+      └──ID 'var1'
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero>
+   ├──COMA
+   └──<ListaInterna>
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero>
+   └──EPSILON
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero>
+   └──NUMERO
+...........................
+<ListaInterna>
+├──ID 'var1'
+└──<ListaInternaNumero>
+   └──ID
+...........................
+Analizando produccion 0...
+Hay espacio en el arbol
+Elemento a analizar: OPERADOR (Es un String y no coinciden)
+Descartar arbol
+Analizando produccion 1...
+No hay espacio en el arbol
+position of index: 0
+position of index: 0
+Analizando produccion 2...
+No hay espacio en el arbol
+Analizando produccion 3...
+Hay espacio en el arbol
+Elemento a analizar: COMA (Es un String y no coinciden)
+Descartar arbol
+Analizando produccion 4...
+No hay espacio en el arbol
+Analizando produccion 5...
+Hay espacio en el arbol
+Elemento a analizar: NUMERO (Es un String y no coinciden)
+Descartar arbol
+Analizando produccion 6...
+Hay espacio en el arbol
+Elemento a analizar: ID (Es un String y no coinciden)
+Descartar arbol
+Analizando producciones...
+<Expresion>
+└──<ExpresionAritmetica>
+   ├──ID 'var1'
+   └──<ExpresionAritmeticaFinal>
+      └──EPSILON
+...........................
+<Condicion>
+├──<ExpresionAritmetica>
+│  ├──ID 'var1'
+│  └──<ExpresionAritmeticaFinal>
+│     └──EPSILON
+├──SIGNO
+└──<ExpresionAritmetica>
+...........................
+Analizando produccion 0...
+No hay espacio en el arbol
+Analizando produccion 1...
+Hay espacio en el arbol
+Elemento a analizar: SIGNO (Es un String y no coinciden)
+Descartar arbol
+
+
+                               ...
+                               
+
+********Verficiamos que el arbol este completo**********
+Elemento a analizar: <ProgramaFin> (Es un string-produccion)
+-- hijo: [EPSILON] (Produccion)
+<Programa>
+├──<Sentencia>
+│  └──<Asignacion>
+│     ├──ID 'var1'
+│     ├──OPERADORASIGNACION '='
+│     └──<Expresion>
+│        └──<ExpresionAritmetica>
+│           ├──NUMERO '5'
+│           └──<ExpresionAritmeticaFinal>
+│              └──EPSILON
+├──PUNTOYCOMA ';'
+└──<ProgramaFin> [EPSILON]
+Elemento a analizar: <ProgramaFin> (Es una produccion)
+-- hijo: Arbol
+<Programa>
+├──<Sentencia>
+│  └──<Asignacion>
+│     ├──ID 'var1'
+│     ├──OPERADORASIGNACION '='
+│     └──<Expresion>
+│        └──<ExpresionAritmetica>
+│           ├──NUMERO '5'
+│           └──<ExpresionAritmeticaFinal>
+│              └──EPSILON
+├──PUNTOYCOMA ';'
+└──<ProgramaFin>
+   └──EPSILON
+la produccion ya esta completa
 ```
