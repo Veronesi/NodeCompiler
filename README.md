@@ -23,7 +23,7 @@ if(Prim == 0){
 };
 ```
 
-### Tabla de tokens generadad por el Analizador Lexico
+### Tabla de tokens generada por el Analizador Lexico
 
 ```
 ┌─────────┬─────────┬─────────────────────────────────┬──────────────────────┬──────┐
