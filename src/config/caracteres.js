@@ -84,6 +84,10 @@ const caracter = [
         caracter: '>=',
         valor: 'SIGNO'
     },
+    {
+        caracter: '"',
+        valor: 'COMILLA'
+    },
 ];
 
 module.exports = caracter;

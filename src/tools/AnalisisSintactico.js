@@ -1,9 +1,11 @@
 "use strict";
 const colors = require('colors/safe');
 const producciones = require('../config/producciones');
-const debug = false;
+const Caracteres = require('../config/caracteres');
+let modeDebug = false;
+let ultimoToken = '';
 function show(text, force = false) {
-    (debug || force) ? console.log(text) : null;
+    (modeDebug || force) ? console.log(text) : null;
 }
 
 /**
@@ -167,9 +169,12 @@ Object.prototype.setChild = function (newChild) {
 };
 
 module.exports = class AnalisisSintactico {
-    constructor() {
+    constructor(params) {
+        const { debug = false } = params;
+        modeDebug = debug;
         this.name = this.constructor.name;
         this.tokens = [];
+        this.error = false;
 
         // lista de Arboles que falta procesar.
         this.produccion = [];
@@ -225,7 +230,8 @@ module.exports = class AnalisisSintactico {
                     break;
             }
         } catch (error) {
-            show(error.message);
+            if(!this.error) show(error.message, true);
+            this.error = true;
         }
     }
 
@@ -374,13 +380,23 @@ module.exports = class AnalisisSintactico {
             let newChild = this.forceEpsilon(production.next());
             if(newChild){
                 if(newChild.length){
-                    newChild.forEach(elementNewChild => {
-                        show(`-- hijo: [${elementNewChild.produce}] (${elementNewChild.name})`);
-                        let newProduction = JSON.parse((JSON.stringify(production)));
-                        newProduction.setChild(elementNewChild);
-                        this.stackProductionotFull.push(newProduction);
-                        newProduction.showTree();
-                    });
+                    try{
+                        if(typeof newChild == 'string'){
+                            let element = Caracteres.find(e => e.valor === newChild);
+                            element = element ? element.caracter : newChild;
+                            throw new Error(colors.red((`SyntaxError: se esperaba un '${element}' en linea ${ultimoToken.line}`)))
+                        }
+                        newChild.forEach(elementNewChild => {
+                            show(`-- hijo: [${elementNewChild.produce}] (${elementNewChild.name})`);
+                            let newProduction = JSON.parse((JSON.stringify(production)));
+                            newProduction.setChild(elementNewChild);
+                            this.stackProductionotFull.push(newProduction);
+                            newProduction.showTree();
+                        });
+                    }catch(error){
+                        if(!this.error) show(error.message, true);
+                        this.error = true;
+                    }
                 }else{
                     let newProduction = JSON.parse((JSON.stringify(production)));
                     newProduction.setChild(newChild);
@@ -425,6 +441,9 @@ module.exports = class AnalisisSintactico {
             });
             let nextToken = this.tokens.shift();
             show(colors.bgBlue(`Proximo token: ${nextToken.type} '${nextToken.element}'`));
+            if(this.produccion != 0){
+                ultimoToken = nextToken;
+            }
             while (this.produccion.length) {
                 show(colors.bgCyan(`Analizando producciones...`));
                 this.produccion.forEach(e => {
@@ -472,7 +491,20 @@ module.exports = class AnalisisSintactico {
             this.stackProductionotFull = [];
         }
         this.produccion = this.stackProductionFull;
-        this.stackProductionReady[0].showTree('', '', true);
-        fun();
+
+        // Verficiamos que solo nos haya quedado una sola produccion
+        try{
+            if(this.stackProductionReady.length === 1){
+                this.stackProductionReady = this.stackProductionReady[0];
+            }else{
+                throw new Error(colors.red((`SyntaxError: token inesperado '${ultimoToken.element}' en linea ${ultimoToken.line}`)));
+            }
+
+            this.stackProductionReady.showTree('', '', true);
+            fun(this.stackProductionReady);
+        } catch (error) {
+            if(!this.error) show(error.message, true);
+            this.error = true;
+        }
     }
 };

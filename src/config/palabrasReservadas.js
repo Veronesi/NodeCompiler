@@ -9,7 +9,8 @@ const palabrasReservadas = [
     'READINT',
     'READLIST',
     'WRITEINT',
-    'WRITELIST'
+    'WRITELIST',
+    'TEXTO'
 ];
 
 module.exports = palabrasReservadas;
