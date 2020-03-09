@@ -12,14 +12,15 @@ analisisLexico.start({
 */
 
 analisisLexico.start({
-    fileName: 'example.f'
+    fileName: 'example.js'
 }, (tokens) => {
-    console.table(tokens)
+    //console.table(tokens)
     const analisisSintactico = new AnalisisSintactico({debug: false});
     analisisSintactico.start({
         tokens : tokens,
         tpyeImport: 'arr'
     }, (three) => {
+        //console.log(JSON.stringify(three));
     	//const codigoIntermedio = new CodigoIntermedio({three: three, debug: true});
         //codigoIntermedio.start(); 
     });

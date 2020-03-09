@@ -2,6 +2,7 @@
 const colors = require('colors/safe');
 const producciones = require('../config/producciones');
 const Caracteres = require('../config/caracteres');
+const fs = require('fs');
 let modeDebug = false;
 let ultimoToken = '';
 function show(text, force = false) {
@@ -428,7 +429,7 @@ module.exports = class AnalisisSintactico {
      *                      - filename: nombre del archivo en donde se encuentra la lista de tokens
      * @param {*} fun function a ejecutar cuando finaliza el analisis
      */
-    start(args, fun) {
+    async start(args, fun) {
         const { tokens = ""/*, tpyeImport= "arr", filename = ""*/ } = args;
         this.tokens = tokens;
         this.initTree();
@@ -501,6 +502,8 @@ module.exports = class AnalisisSintactico {
             }
 
             this.stackProductionReady.showTree('', '', true);
+            const output = await JSON.stringify(this.stackProductionReady);
+            fs.writeFileSync("./src/public/sintactico-output.js", output);
             fun(this.stackProductionReady);
         } catch (error) {
             if(!this.error) show(error.message, true);

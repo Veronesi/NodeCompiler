@@ -152,15 +152,19 @@ module.exports = class AnalisisLexico {
      * @param {function} success Ejecuta al funcion al terminar el analisis.
      * @returns {Array} arreglo de tokens
      */
-    start(args, success = () => { }) {
+    async start(args, success = () => { }) {
         const { fileName = 'non_file_name', scan = true } = args;
         if (scan) {
             this.ImportarCodigo(fileName);
             this.LeerLineas();
             this.analizarLineas();
         }
-        if(!this.error)
+        if(!this.error){
+            const output = await JSON.stringify(this.tokens);
+            fs.writeFileSync("./src/public/lexico-output.js", output);
             success(this.tokens);
+        }
+            
         
         
     }
