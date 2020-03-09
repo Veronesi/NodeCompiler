@@ -422,3 +422,31 @@ if(Prim == 0){
                      └──<Programa>
                         └──EPSILON
 ```
+
+## Manejo de errores:
+
+### durante la fase del analizador lexico:
+
+```js
+while(i < 10){
+    readint(Elem);
+    a =$ cons(Elem, A);
+    i = i+1;
+};
+```
+> ***LexicalError***: token no válido o inesperado '***$***' en linea ***3***
+
+### durante la fase del analizador sintactico:
+
+```js
+while(i < 10){
+    readint(Elem);
+    a = cons(Elem, A);
+    i = i+1 [4, 3];
+};
+```
+> ***SyntaxError***: token inesperado \' ***\[***\' en linea ***4***
+
+
+
+
