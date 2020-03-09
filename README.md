@@ -1,5 +1,4 @@
 # NodeCompiler
-Compiler programed in NodeJs
 
 ### Codigo fuente de ejemplo
 
