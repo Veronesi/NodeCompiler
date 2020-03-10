@@ -501,7 +501,7 @@ module.exports = class AnalisisSintactico {
                 throw new Error(colors.red((`SyntaxError: token inesperado '${ultimoToken.element}' en linea ${ultimoToken.line}`)));
             }
 
-            this.stackProductionReady.showTree('', '', true);
+            //this.stackProductionReady.showTree('', '', true);
             const output = await JSON.stringify(this.stackProductionReady);
             fs.writeFileSync("./src/public/sintactico-output.js", output);
             fun(this.stackProductionReady);
