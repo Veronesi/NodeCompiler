@@ -15,13 +15,13 @@ let evaluador = new Evaluador({three: JSON.parse(textoPlano), debug: true});
 evaluador.start()
 */
 
-/*
+
 analisisLexico.start({
-    fileName: 'example.f'
+    fileName: 'example.js'
 }, tokens => console.table(tokens))
-*/
 
 
+/*
 analisisLexico.start({
     fileName: 'example.js'
 }, (tokens) => {
@@ -36,4 +36,4 @@ analisisLexico.start({
         //codigoIntermedio.start(); 
     });
 });
-
+*/

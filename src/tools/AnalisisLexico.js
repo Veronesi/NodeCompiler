@@ -26,6 +26,19 @@ module.exports = class AnalisisLexico {
         this.error = false;
     }
 
+    clear(){
+        this.fileName = "";
+        this.lines = [];
+        this.name = this.constructor.name;
+        this.textoPlano = "";
+        this.tokens = [];
+        this.error = false;
+    }
+
+    SetTextoPlano(texto){
+        this.textoPlano = texto
+    }
+
     /**
      * @description Lee el archivo y lo guarda en texto plano
      * @param {String} fileName 
@@ -48,7 +61,7 @@ module.exports = class AnalisisLexico {
         });
     }
 
-    analizarLineas() {
+    analizarLineas(success = () =>{}) {
         this.lines.forEach(line => {
             let texto = line.line
             while (texto.length) {
@@ -103,12 +116,14 @@ module.exports = class AnalisisLexico {
                 catch (error) {
                     texto = "";
                     this.error = true;
+                    this.Error = error.message
                     console.log(error.message);
                 }
                 // Borramos los espacios en blanco que quedaron
                 texto = texto.replace(expReg.Espacio, '')
             }
         });
+        success(this.tokens)
     }
 
 
@@ -164,8 +179,5 @@ module.exports = class AnalisisLexico {
             fs.writeFileSync("./src/public/lexico-output.js", output);
             success(this.tokens);
         }
-            
-        
-        
     }
 };
