@@ -4,8 +4,16 @@
   "description": "Compiler programed in NodeJs",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src",
-    "test": "jest /src"
+    "test": "jest /src",
+    "scanner": "node src scanner",
+    "parsing": "node src parsing",
+    "compile": "node src compile",
+    "start": "node src start",
+    "help": "node src help",
+    "characters": "node src characters",
+    "reserved-words": "node src reserved-words",
+    "productions": "node src productions"
+    
   },
   "repository": {
     "type": "git",

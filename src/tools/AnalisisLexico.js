@@ -26,7 +26,7 @@ module.exports = class AnalisisLexico {
         this.error = false;
     }
 
-    clear(){
+    clear() {
         this.fileName = "";
         this.lines = [];
         this.name = this.constructor.name;
@@ -35,7 +35,7 @@ module.exports = class AnalisisLexico {
         this.error = false;
     }
 
-    SetTextoPlano(texto){
+    SetTextoPlano(texto) {
         this.textoPlano = texto
     }
 
@@ -46,7 +46,11 @@ module.exports = class AnalisisLexico {
      */
     ImportarCodigo(fileName) {
         this.fileName = fileName;
-        this.textoPlano = fs.readFileSync(`./src/public/${this.fileName}`, 'utf8');
+        try{
+            this.textoPlano = fs.readFileSync(`./src/public/${this.fileName}`, 'utf8');
+        }catch{
+            console.log(colors.red((`Error: No se a podido encontrar el archivo ./src/public/${this.fileName}`)));
+        }
     }
 
     /**
@@ -61,7 +65,7 @@ module.exports = class AnalisisLexico {
         });
     }
 
-    analizarLineas(success = () =>{}) {
+    analizarLineas(success = () => { }) {
         this.lines.forEach(line => {
             let texto = line.line
             while (texto.length) {
@@ -69,17 +73,17 @@ module.exports = class AnalisisLexico {
                 texto = texto.replace(expReg.Espacio, '')
 
                 const match = expReg.ones.exec(texto);
-                try{
-                if (match === null) {
-                    throw new Error(colors.red((`LexicalError: token no válido o inesperado '${texto[0]}' en linea ${line.number}`)))
-                } else {
-                    const type = this.getType(match[0]);
+                try {
+                    if (match === null) {
+                        throw new Error(colors.red((`LexicalError: token no válido o inesperado '${texto[0]}' en linea ${line.number}`)))
+                    } else {
+                        const type = this.getType(match[0]);
                         if (!type) {
                             throw new Error(colors.red((`LexicalError: token no válido o inesperado '${texto[0]}' en linea ${line.number}`)))
                         } else {
-                            if(type == 'CADENA'){
+                            if (type == 'CADENA') {
                                 texto = texto.slice(match[0].length);
-                                
+
                                 this.tokens.push({
                                     name: 'Token',
                                     element: '"',
@@ -101,7 +105,7 @@ module.exports = class AnalisisLexico {
                                     line: line.number
                                 });
 
-                            }else{
+                            } else {
                                 texto = texto.slice(match[0].length);
                                 this.tokens.push({
                                     name: 'Token',
@@ -168,15 +172,25 @@ module.exports = class AnalisisLexico {
      * @returns {Array} arreglo de tokens
      */
     async start(args, success = () => { }) {
-        const { fileName = 'non_file_name', scan = true } = args;
+        const { fileName = 'non_file_name', scan = true, save = false } = args;
         if (scan) {
-            this.ImportarCodigo(fileName);
-            this.LeerLineas();
-            this.analizarLineas();
+            try {
+                if(fileName == 'non_file_name')
+                    throw new Error(colors.red((`Error: Nombre de archivo indefinido: npm run scanner ejemplo.js`)))
+                    this.ImportarCodigo(fileName);
+                    this.LeerLineas();
+                    this.analizarLineas();
+            } catch (error) {
+                this.error = true;
+                this.Error = error.message
+                console.log(error.message);
+            }            
         }
-        if(!this.error){
-            const output = await JSON.stringify(this.tokens);
-            fs.writeFileSync("./src/public/lexico-output.js", output);
+        if (!this.error) {
+            if (save) {
+                const output = await JSON.stringify(this.tokens);
+                fs.writeFileSync("./src/public/lexico-output.js", output);
+            }
             success(this.tokens);
         }
     }
