@@ -40,3 +40,9 @@ Examples
     npm run lexying myfile.js save
     npm run start myfile.js
 ```
+
+## Funcionamiento
+
+### Analisis Lexico
+
+En esta fase se lee el codigo de entrada `*.js` leyendo linea a linea, limpiando espacios en blanco y comentarios, mediante expresiones regulares [analiza](https://github.com/Veronesi/NodeCompiler/blob/e7702fe3cf06dffd7377b4712b6dc85122936f1a/src/tools/AnalisisLexico.js#L70-L135) cada elemento
