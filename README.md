@@ -16,4 +16,27 @@
 
 ## Lista de comandos
 
-Algunos comandos pueden ser que no esten activados aun:
+```
+Usage: npm run [Command] [filename.js] [arguments]
+
+Global Commands
+    lexying ............................. Genera la tabla de componentes Lexicos
+    parsing ............................. Genera el arbol sintactico
+    compile ............................. Compila un archivo en codigo fuente
+    start ............................... Compila y ejecuta un archivo 
+
+    help ................................ Muestra informacion sobre los comandos
+    
+    characters .......................... Lista los caracteres
+    reserved-words ...................... Lista las palabras reservadas
+    productions ......................... Lista las producciones
+
+Global arguments
+    debug ............................... Muetra que va haciendo el compilador
+    save ................................ Exporta cada etapa en archivos
+    show ................................ Muetra informacion al finalizar cada etapa
+
+Examples
+    npm run lexying myfile.js save
+    npm run start myfile.js
+```
