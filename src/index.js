@@ -2,7 +2,7 @@
 const fs = require('fs');
 const AnalisisLexico = require('./tools/AnalisisLexico');
 const AnalisisSintactico = require('./tools/AnalisisSintactico');
-const Evaluador = require('./tools/Evaluador');
+const CodigoIntermedio = require('./tools/Evaluador')
 
 const help =
     ` _____       _     _____               _ _         
@@ -40,17 +40,44 @@ Examples
 repo: https://github.com/Veronesi/NodeCompiler
 `
 
-
+let analisisLexico = new AnalisisLexico();
 if (process.argv.length > 2) {
     switch (process.argv[2]) {
         case 'scanner':
-            console.log('run scanner...')
-            const analisisLexico = new AnalisisLexico();
+            console.log('runing...')
+            analisisLexico = new AnalisisLexico();
             analisisLexico.start({ fileName: process.argv[3], save: process.argv.includes("save") })
             process.argv.includes("show") ? console.table(analisisLexico.tokens) : false;
             break;
         case 'parsing':
-            console.log('run parsing...')
+            console.log('runing...')
+            analisisLexico = new AnalisisLexico();
+            analisisLexico.start({ fileName: process.argv[3], save: process.argv.includes("save") }, tokens => {
+                process.argv.includes("show") ? console.table(tokens) : false;
+
+                const analisisSintactico = new AnalisisSintactico({ debug: process.argv.includes("debug") });
+                analisisSintactico.start({
+                    tokens: tokens
+                }, tree => {
+                    process.argv.includes("show") ? tree.showTree('', '', true) : false;
+                });
+            })
+            break;
+        case 'start':
+            console.log('runing...')
+            analisisLexico = new AnalisisLexico();
+            analisisLexico.start({ fileName: process.argv[3], save: process.argv.includes("save") }, tokens => {
+                process.argv.includes("show") ? console.table(tokens) : false;
+
+                const analisisSintactico = new AnalisisSintactico({ debug: process.argv.includes("debug") });
+                analisisSintactico.start({
+                    tokens: tokens
+                }, tree => {
+                    process.argv.includes("show") ? tree.showTree('', '', true) : false;
+                    const codigoIntermedio = new CodigoIntermedio({tree: tree, debug: true});
+                    codigoIntermedio.start();
+                });
+            })
             break;
         case 'help':
             console.log(help)
@@ -81,27 +108,4 @@ JSON.parse(textoPlano).showTree('', '', true);
 
 let evaluador = new Evaluador({three: JSON.parse(textoPlano), debug: true});
 evaluador.start()
-*/
-
-/*
-analisisLexico.start({
-    fileName: 'example.js'
-}, tokens => console.table(tokens))
-*/
-console.log(process.argv);
-/*
-analisisLexico.start({
-    fileName: 'example.js'
-}, (tokens) => {
-    //console.table(tokens)
-    const analisisSintactico = new AnalisisSintactico({debug: false});
-    analisisSintactico.start({
-        tokens : tokens,
-        tpyeImport: 'arr'
-    }, (three) => {
-        //showTree(three);
-    	//const codigoIntermedio = new CodigoIntermedio({three: three, debug: true});
-        //codigoIntermedio.start();
-    });
-});
 */

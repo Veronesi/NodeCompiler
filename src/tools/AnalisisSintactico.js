@@ -208,6 +208,7 @@ module.exports = class AnalisisSintactico {
                     if (prod.length) {
                         return prod;
                     } else {
+                        console.log(colors.red('✘')+' Parsing')
                         throw new Error(`ERROR: doesn't exist element to produce '${element.element}' on line ${element.line}`);
                     }
                     break;
@@ -385,6 +386,7 @@ module.exports = class AnalisisSintactico {
                         if(typeof newChild == 'string'){
                             let element = Caracteres.find(e => e.valor === newChild);
                             element = element ? element.caracter : newChild;
+                            console.log(colors.red('✘')+' Parsing')
                             throw new Error(colors.red((`SyntaxError: se esperaba un '${element}' en linea ${ultimoToken.line}`)))
                         }
                         newChild.forEach(elementNewChild => {
@@ -498,12 +500,14 @@ module.exports = class AnalisisSintactico {
             if(this.stackProductionReady.length === 1){
                 this.stackProductionReady = this.stackProductionReady[0];
             }else{
+                console.log(colors.red('✘')+' Parsing')
                 throw new Error(colors.red((`SyntaxError: token inesperado '${ultimoToken.element}' en linea ${ultimoToken.line}`)));
             }
 
             //this.stackProductionReady.showTree('', '', true);
             const output = await JSON.stringify(this.stackProductionReady);
             fs.writeFileSync("./src/public/sintactico-output.js", output);
+            console.log(colors.green('✔')+' Parsing')
             fun(this.stackProductionReady);
         } catch (error) {
             if(!this.error) show(error.message, true);

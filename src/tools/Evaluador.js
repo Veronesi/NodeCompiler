@@ -4,16 +4,21 @@ let modeDebug;
 
 module.exports = class Evaluador {
     constructor(params) {
-        const { debug = false, three } = params;
+        const { debug = false, tree } = params;
         modeDebug = debug;
         this.name = this.constructor.name;
-        this.three = three;
+        this.tree = tree;
         this.temps = [];
         this.vars = [];
         this.codigoIntermedio = [];
         this.error = false;
     }
 
+    /**
+     * 
+     * @param {[Tree|Token]} childsList 
+     * @description Muestra los hijos de un elemento de forma legible 
+     */
     seeChilds(childsList) {
         let lista = 'Lista de hijos: ';
         childsList.forEach(child => {
@@ -31,12 +36,17 @@ module.exports = class Evaluador {
         });
         console.log(lista);
     }
-
+    /**
+     * 
+     * @param {Token<ID>} varaible 
+     * @description Gurda una variable en la tabla de variables y si existe la actualiza, ademas de asignarle una variable temporal
+     */
     SetVar(varaible) {
         const positionVariable = this.vars.findIndex(e => e.name == varaible.element);
+        // Creamos una variable temp. 
         const newTemp = `temp${this.temps.length + 1}`;
         const newVar = { name: varaible.element, value: newTemp, type: 'var' };
-        (positionVariable < 0) ? this.vars.push(newVar) : this.vars[positionVariable] = newVar;
+        positionVariable < 0 ? this.vars.push(newVar) : this.vars[positionVariable] = newVar;
 
         this.temps.push({ name: newTemp, value: null, _eval: null, type: 'temp' });
 
@@ -126,7 +136,6 @@ module.exports = class Evaluador {
         switch (childs[0].type) {
             case 'NUMERO':
                 if(variable.type == 'temp'){
-                    //console.log(variable.name, childs[0].element);
                     newTemp = this.SetTemp(variable.name, childs[0].element);
                 }else{
                     newTemp = this.SetTemp(variable.value, childs[0].element);
@@ -153,12 +162,23 @@ module.exports = class Evaluador {
                     this.error = true;
                 }
                 break;
+            /*
+                case 'PARENTESIS_OPEN':
+                this.EvalExpresionAritmetica(childs[1].childs, variable)
+                break;
+                */
             default:
                 console.log(`ERROR en EvalExpresionAritmetica: ${childs[0].type}`)
                 break;
         }
     }
 
+    /**
+     * 
+     * @param {*} expresion 
+     * @param {*} variable 
+     * @module <Expresion>
+     */
     EvalExpresion(expresion, variable) {
         console.log(`\nExpresion a evaluar: ${colors.cyan(expresion.childs[0].node)}`);
         switch (expresion.childs[0].node) {
@@ -176,40 +196,38 @@ module.exports = class Evaluador {
         //console.log();
     }
 
-    EvalSentencia(three) {
-        const sentencia = three.childs[0];
-        console.log(sentencia.childs);
-        console.log(`\nSentencia a analizar: ${colors.cyan(sentencia.node)}`);
-        this.seeChilds(sentencia.childs);
+    /**
+     * 
+     * @param {Tree} tree 
+     * @description Evalua una <Sentencia>
+     * @module <Sentencia>
+     */
+    EvalSentencia(tree) {
+        const sentencia = tree.childs[0]
+        console.log(`\nSentencia a analizar: ${colors.cyan(sentencia.node)}`)
+        this.seeChilds(sentencia.childs)
         switch (sentencia.node) {
             case '<Asignacion>':
-                // Guardamos la variable.
-                const newVar = this.SetVar(sentencia.childs[0]);
-                this.temp = newVar.value;
-                // Evaluamos la <Expresion>
+                // Actualizamos su valor (como temp.)
+                const newVar = this.SetVar(sentencia.childs[0])
+                this.temp = newVar.value
                 this.EvalExpresion(sentencia.childs[2], newVar)
                 break;
-
             default:
-                console.log(`Error: no existe la sentencia '${sentencia.node}'`);
+                console.log(`Error: no existe la sentencia '${sentencia.node}'`)
                 break;
         }
-        /*
-        console.log(three);
-        console.log(`nodo: ${three.node}`);
-        console.log(three.childs);
-        */
     }
 
     start() {
-        this.EvalSentencia(this.three.childs[0]);
+        this.EvalSentencia(this.tree.childs[0])
 
-        if(this.three.childs[2].childs[0] != 'EPSILON'){
-            this.EvalSentencia(this.three.childs[2].childs[0]);
+        if(this.tree.childs[2].childs[0] != 'EPSILON'){
+            this.EvalSentencia(this.tree.childs[2].childs[0])
         }
         if(!this.error){
-            console.table(this.vars);
-            console.table(this.temps);
+            console.table(this.vars)
+            console.table(this.temps)
         }        
     }
 };

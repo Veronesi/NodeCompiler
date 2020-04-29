@@ -49,6 +49,8 @@ module.exports = class AnalisisLexico {
         try{
             this.textoPlano = fs.readFileSync(`./src/public/${this.fileName}`, 'utf8');
         }catch{
+            this.error = true;
+            console.log(colors.red('✘')+' Scanner')
             console.log(colors.red((`Error: No se a podido encontrar el archivo ./src/public/${this.fileName}`)));
         }
     }
@@ -75,10 +77,12 @@ module.exports = class AnalisisLexico {
                 const match = expReg.ones.exec(texto);
                 try {
                     if (match === null) {
+                        console.log(colors.red('✘')+' Scanner')
                         throw new Error(colors.red((`LexicalError: token no válido o inesperado '${texto[0]}' en linea ${line.number}`)))
                     } else {
                         const type = this.getType(match[0]);
                         if (!type) {
+                            console.log(colors.red('✘')+' Scanner')
                             throw new Error(colors.red((`LexicalError: token no válido o inesperado '${texto[0]}' en linea ${line.number}`)))
                         } else {
                             if (type == 'CADENA') {
@@ -175,8 +179,10 @@ module.exports = class AnalisisLexico {
         const { fileName = 'non_file_name', scan = true, save = false } = args;
         if (scan) {
             try {
-                if(fileName == 'non_file_name')
+                if(fileName == 'non_file_name'){
+                    console.log(colors.red('✘')+' Scanner')
                     throw new Error(colors.red((`Error: Nombre de archivo indefinido: npm run scanner ejemplo.js`)))
+                }
                     this.ImportarCodigo(fileName);
                     this.LeerLineas();
                     this.analizarLineas();
@@ -191,6 +197,7 @@ module.exports = class AnalisisLexico {
                 const output = await JSON.stringify(this.tokens);
                 fs.writeFileSync("./src/public/lexico-output.js", output);
             }
+            console.log(colors.green('✔')+' Scanner')
             success(this.tokens);
         }
     }
