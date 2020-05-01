@@ -70,8 +70,10 @@ LexicalError: token no válido o inesperado '$' en linea 1
 
 ### Analisis Sintactico
 En esta fase de desidio dividir en 3 etapas. 
-- Buscar un subarbol (sin importar que que no sea el raiz sea la produccion `<Programa>` ni que el arbol este completo) ya que eran muchos mas los posibles arboles que generen la produccion a medida que se van analizando los tokens que empezar por la produccion que genere el primer token. 
-1. Se toma el primer token de la lista de tokens y se busca todas las producciones que general al mismo (aquellas producciones que el primer token que genera sea este). 
+
+**1.** Buscar un subarbol (sin importar que que no sea el raiz sea la produccion `<Programa>` ni que el arbol este completo) ya que eran muchos mas los posibles arboles que generen la produccion a medida que se van analizando los tokens que empezar por la produccion que genere el primer token. 
+
+**1.1** Se toma el primer token de la lista de tokens y se busca todas las producciones que general al mismo (aquellas producciones que el primer token que genera sea este). 
 ```
 Ej.:
 Proximo Token: SIGNO
@@ -79,7 +81,7 @@ Proximo Token: SIGNO
 posibles produccines que lo generan:
 <Condicion> => <ExpresionAritmetica> SIGNO <ExpresionAritmetica>
 ```
-2. se insertan todas las producciones en `AnalisisSintactico.produccion` que generan al token.
+**1.2.** se insertan todas las producciones en `AnalisisSintactico.produccion` que generan al token.
 ```
 Ej.:
 <Condicion>
@@ -88,9 +90,9 @@ Ej.:
 └──NUMERO (Token libre)
 ```
 
-3. Se toma el proximo token de la lista de tokens y se verifica cada posible produccion del paso anterior si sigue siendo posible.
+**1.3.** Se toma el proximo token de la lista de tokens y se verifica cada posible produccion del paso anterior si sigue siendo posible.
 
-   a. si el token coincide con el proximo "token libre" de la posible produccion, este se inserta, caso contrario la produccion se descarta.
+1.3.1. si el token coincide con el proximo "token libre" de la posible produccion, este se inserta, caso contrario la produccion se descarta.
 ```
 Ej.:
 Proximo Token: NUMERO
@@ -100,8 +102,8 @@ Proximo Token: NUMERO
 ├──SIGNO '>'
 └──NUMERO '123' <- Se insertara en este Token libre
 ```
-   
-   b. si no hay mas tokens libres se busca la primera "produccion libre" que se encuentre despues del ultimo token no-libre, reemplazando el mimso por aquellas producciones que generen a este token (si no hay produccion que genere a este token, la produccion se descarta).
+
+**1.3.2.** si no hay mas tokens libres se busca la primera "produccion libre" que se encuentre despues del ultimo token no-libre, reemplazando el mimso por aquellas producciones que generen a este token (si no hay produccion que genere a este token, la produccion se descarta).
    
 ```
 Ej.:
@@ -128,7 +130,8 @@ Reemplazando en la posble produccion
     ├──NUMERO '123'                                  | Nuevo bloque
     └──<ExpresionAritmeticaFinal> (Produccion libre) |
 ```  
-   c. Si no hay ni token libres ni producciones libres se busca aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
+
+**1.3.3.** Si no hay ni token libres ni producciones libres se busca aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
    
 ```
 Ej.:
@@ -160,3 +163,5 @@ Insertamos todas las producciones que generan a <Asignacion>
          └──<ExpresionAritmeticaFinal>
             └──EPSILON
 ```
+
+una vez que se terminaron de analizar todas las posibles producciones para este token, si aun quedan producciones sin incluir a este (en el caso que haya pasado el punto 1.3.2 o 1.3.3) se pasa al proximo token, caso contrario se vuelven a analizar estas producciones hasta que incluyan al token.
