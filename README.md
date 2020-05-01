@@ -62,11 +62,10 @@ A = 3;
 ```
 
 En esta fase solo puede generarse un error al "leerse" un elemento que no sea capturado por ninguna expresión regular, por ejemplo un caracter que no esté en la lista de caracteres
-```
+```js
 var1 = $;
-
-LexicalError: token no válido o inesperado '$' en linea 1
 ```
+> **LexicalError**: token no válido o inesperado **'$'** en linea **1**
 
 ### Analisis Sintactico
 En esta fase de desidio dividir en 3 etapas. 
@@ -74,7 +73,7 @@ En esta fase de desidio dividir en 3 etapas.
 **1.** Buscar un subarbol (sin importar que que no sea el raiz sea la produccion `<Programa>` ni que el arbol este completo) ya que eran muchos mas los posibles arboles que generen la produccion a medida que se van analizando los tokens que empezar por la produccion que genere el primer token. 
 
 **1.1** Se toma el primer token de la lista de tokens y se busca todas las producciones que general al mismo (aquellas producciones que el primer token que genera sea este). 
-```
+```js
 Ej.:
 Proximo Token: SIGNO
 
@@ -82,7 +81,7 @@ posibles produccines que lo generan:
 <Condicion> => <ExpresionAritmetica> SIGNO <ExpresionAritmetica>
 ```
 **1.2.** se insertan todas las producciones en `AnalisisSintactico.produccion` que generan al token.
-```
+```js
 Ej.:
 <Condicion>
 ├──<ExpresionAritmetica> (Produccion libre)
@@ -92,8 +91,8 @@ Ej.:
 
 **1.3.** Se toma el proximo token de la lista de tokens y se verifica cada posible produccion del paso anterior si sigue siendo posible.
 
-1.3.1. si el token coincide con el proximo "token libre" de la posible produccion, este se inserta, caso contrario la produccion se descarta.
-```
+**1.3.1.** si el token coincide con el proximo "token libre" de la posible produccion, este se inserta, caso contrario la produccion se descarta.
+```js
 Ej.:
 Proximo Token: NUMERO
    
@@ -105,7 +104,7 @@ Proximo Token: NUMERO
 
 **1.3.2.** si no hay mas tokens libres se busca la primera "produccion libre" que se encuentre despues del ultimo token no-libre, reemplazando el mimso por aquellas producciones que generen a este token (si no hay produccion que genere a este token, la produccion se descarta).
    
-```
+```js
 Ej.:
 Proximo Token: NUMERO (123)
 
@@ -133,7 +132,7 @@ Reemplazando en la posble produccion
 
 **1.3.3.** Si no hay ni token libres ni producciones libres se busca aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
    
-```
+```js
 Ej.:
 Proximo Token: PUNTOYCOMA
 
@@ -153,7 +152,7 @@ Producciones que generan a <Asignacion>
 
 Insertamos todas las producciones que generan a <Asignacion>
 
-<Sentencia>
+<Sentencia>                        <- No es el Nodo Raiz del lenguaje
 └──<Asignacion>
    ├──ID 'A'
    ├──OPERADORASIGNACION '='
@@ -164,4 +163,81 @@ Insertamos todas las producciones que generan a <Asignacion>
             └──EPSILON
 ```
 
-una vez que se terminaron de analizar todas las posibles producciones para este token, si aun quedan producciones sin incluir a este (en el caso que haya pasado el punto 1.3.2 o 1.3.3) se pasa al proximo token, caso contrario se vuelven a analizar estas producciones hasta que incluyan al token.
+Una vez que se terminaron de analizar todas las posibles producciones para este token, si aun quedan producciones sin incluir a este (en el caso que haya pasado el punto 1.3.2 o 1.3.3) se pasa al proximo token, caso contrario se vuelven a analizar estas producciones hasta que incluyan al token.
+
+**2.** Cuando ya no quedan mas tokens por analizar, siguiendo la misma estrategia del punto anterior, se trata de que el nodo raiz de cada posible produccion sea generado por el **Nodo Raiz**, para este lenguaje es la produccion `<Programa>`.
+
+```js
+A = 3;
+
+<Programa> <- Nodo Raiz
+├──<Sentencia>
+│  └──<Asignacion>
+│     ├──ID 'A'
+│     ├──OPERADORASIGNACION '='
+│     └──<Expresion>
+│        └──<ExpresionAritmetica>
+│           ├──NUMERO '3'
+│           └──<ExpresionAritmeticaFinal>
+│              └──EPSILON
+├──PUNTOYCOMA ';'
+└──<ProgramaFin> (Produccion libre)
+```
+
+**3.** Luego se trata de completar todas las posibles producciones, es decir, que no quede ninguna "produccion libre" ni que quede un "token libre", quedando una unica produccion posible, sinedo esta la produccion que genera a la lista de tokens. 
+
+```js
+A = 3;
+
+<Programa>
+├──<Sentencia>
+│  └──<Asignacion>
+│     ├──ID 'A'
+│     ├──OPERADORASIGNACION '='
+│     └──<Expresion>
+│        └──<ExpresionAritmetica>
+│           ├──NUMERO '3'
+│           └──<ExpresionAritmeticaFinal>
+│              └──EPSILON
+├──PUNTOYCOMA ';'
+└──<ProgramaFin>
+   └──EPSILON
+```
+
+En esta fase puede generarse un error por (cuando solo queda una unica posible produccion, ya que si quedan varias esta se descarta): 
+- cuando se quiere insertar un token y existe un "token libre" y estos no coinciden,
+```js
+
+while(i < 10){ [       <-- Elemento '[' genera un error
+    readint(Elem);
+    a = cons(Elem, A);
+    i = i+1;
+};
+
+Proximo Token: CORCHETE_OPEN
+<Ciclo>
+├──WHILE 'while'
+├──PARENTESIS_OPEN '('
+├──<Condicion>
+│  ├──<ExpresionAritmetica>
+│  │  ├──ID 'i'
+│  │  └──<ExpresionAritmeticaFinal>
+│  │     └──EPSILON
+│  ├──SIGNO '<'
+│  └──<ExpresionAritmetica>
+│     ├──NUMERO '10'
+│     └──<ExpresionAritmeticaFinal>
+│        └──EPSILON
+├──PARENTESIS_CLOSE ')'
+├──LLAVE_OPEN '{'
+├──<Programa>
+│  ├──<Sentencia>
+│  │  └──<Lectura>
+│  │     └──<LecturaLista>
+│  │        ├──READLIST                <- Proximo Token Libre
+│  │        └──<EscrituraLectura>
+│  ├──PUNTOYCOMA                     
+│  └──<ProgramaFin>
+└──LLAVE_CLOSE
+```
+> **SyntaxError**: token inesperado **'['** en linea **1**
