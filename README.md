@@ -68,3 +68,7 @@ var1 = $;
 LexicalError: token no válido o inesperado '$' en linea 1
 ```
 
+### Analisis Sintactico
+En esta fase de desidio dividir en 3 etapas. 
+- Buscar un subarbol (sin importar que que no sea el raiz sea la produccion `<Programa>` ni que el arbol este completo) ya que eran muchos mas los posibles arboles que generen la produccion a medida que se van analizando los tokens que empezar por la produccion que genere el primer token. 
+
