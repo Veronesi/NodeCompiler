@@ -165,7 +165,7 @@ Insertamos todas las producciones que generan a <Asignacion>
 
 Una vez que se terminaron de analizar todas las posibles producciones para este token, si aun quedan producciones sin incluir a este (en el caso que haya pasado el punto 1.3.2 o 1.3.3) se pasa al proximo token, caso contrario se vuelven a analizar estas producciones hasta que incluyan al token.
 
-**2.** Cuando ya no quedan mas tokens por analizar, siguiendo la misma estrategia del punto anterior, se trata de que el nodo raiz de cada posible produccion sea generado por el **Nodo Raiz**, para este lenguaje es la produccion `<Programa>`.
+**2.** Cuando ya no quedan mas tokens por [analizar](https://github.com/Veronesi/NodeCompiler/blob/812fd9cc2210fc26fc62d8aaf361af32b37e7895/src/tools/AnalisisSintactico.js#L346), siguiendo la misma estrategia del punto anterior, se trata de que el nodo raiz de cada posible produccion sea generado por el **Nodo Raiz**, para este lenguaje es la produccion `<Programa>`.
 
 ```js
 A = 3;
@@ -184,7 +184,7 @@ A = 3;
 └──<ProgramaFin> (Produccion libre)
 ```
 
-**3.** Luego se trata de completar todas las posibles producciones, es decir, que no quede ninguna "produccion libre" ni que quede un "token libre", quedando una unica produccion posible, sinedo esta la produccion que genera a la lista de tokens. 
+**3.** Luego se trata de [completar](https://github.com/Veronesi/NodeCompiler/blob/812fd9cc2210fc26fc62d8aaf361af32b37e7895/src/tools/AnalisisSintactico.js#L371) todas las posibles producciones, es decir, que no quede ninguna "produccion libre" ni que quede un "token libre", quedando una unica produccion posible, sinedo esta la produccion que genera a la lista de tokens. 
 
 ```js
 A = 3;
