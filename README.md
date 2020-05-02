@@ -130,7 +130,7 @@ Reemplazando en la posble produccion
     └──<ExpresionAritmeticaFinal> (Produccion libre) |
 ```  
 
-**1.3.3.** Si no hay ni token libres ni producciones libres se busca aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
+**1.3.3.** Si no hay ni token libres ni producciones libres se [busca](https://github.com/Veronesi/NodeCompiler/blob/812fd9cc2210fc26fc62d8aaf361af32b37e7895/src/tools/AnalisisSintactico.js#L325-L335) aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
    
 ```js
 Ej.:
