@@ -17,7 +17,7 @@ Commands:
 Usage: npm run [Command] [filename.js] [arguments]
 
 Global Commands
-    lexying ............................. Genera la tabla de componentes Lexicos
+    scanner ............................. Genera la tabla de componentes Lexicos
     parsing ............................. Genera el arbol sintactico
     compile ............................. Compila un archivo en codigo fuente
     start ............................... Compila y ejecuta un archivo 

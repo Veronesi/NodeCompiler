@@ -343,36 +343,28 @@ module.exports = class AnalisisSintactico {
      * fuerza a la produccione para que sea generada por el nodo raiz si es posible.
      * 
      */
-    rootearProduccion(production) {
+    rootearProduccion(oneProduction) {
         // Verificamos si ya esta rooteado
         /**
          * @todo Cambiar '<Programa>' por una cte.
          */
-        if (production.node === '<Programa>') {
+        if (oneProduction.node === '<Programa>') {
             show('la produccion ya esta rooteada');
-            this.stackProductionRooted.push(production);
+            this.stackProductionRooted.push(oneProduction);
             return;
         } else {
-            // Buscamos quienes lo produce
-            let e = producciones.filter(e => {
-                const position = e.produce.indexOf(production.node);
-                const positionFirstString =  e.produce.findIndex(f => (f[0] !== '<' && f[0] !== 'EPSILON'));
-                if (position > -1 && (positionFirstString === -1 || positionFirstString > position)) {
-                    let newsRoots = this.getProduction(production.node);
-                    if (newsRoots) {
-                        newsRoots.forEach(newsProduccion => {
-                            newsProduccion.produce[newsProduccion.positionInProduce(oneProduction.node)] = oneProduction;
-                            let newProduction = {
-                                node: newsProduccion.produccion,
-                                childs: newsProduccion.produce,
-                                name: 'Arbol'
-                            };
-                            this.stackProductionotRouted.push(newProduction);
-                        });
-                    }
-                    return true;
-                }
-            });
+            let newsRoots = this.getProduction(oneProduction.node);
+            if (newsRoots) {
+                newsRoots.forEach(newsProduccion => {
+                    newsProduccion.produce[newsProduccion.positionInProduce(oneProduction.node)] = oneProduction;
+                    let newProduction = {
+                        node: newsProduccion.produccion,
+                        childs: newsProduccion.produce,
+                        name: 'Arbol'
+                    };
+                    this.stackProductionotRouted.push(newProduction);
+                });
+            }
         }
     }
 
