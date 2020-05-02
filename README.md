@@ -205,7 +205,7 @@ A = 3;
 ```
 
 En esta fase puede generarse un error por (cuando solo queda una unica posible produccion, ya que si quedan varias esta se descarta): 
-- cuando se quiere insertar un token y existe un "token libre" y estos no coinciden,
+- cuando se quiere insertar un token y existe un "token libre" y estos no coinciden
 ```js
 
 while(i < 10){ [       <-- Elemento '[' genera un error
@@ -240,4 +240,24 @@ Proximo Token: CORCHETE_OPEN
 │  └──<ProgramaFin>
 └──LLAVE_CLOSE
 ```
-> **SyntaxError**: token inesperado **'['** en linea **1**
+> **SyntaxError**: token inesperado **'\['** en linea **1**
+
+- a la hora de verificar si la produccion esta completa (etapa 3), la unica produccion posible es descartada por que queda un token libre
+```js
+
+var1 = 45
+
+<Programa>
+├──<Sentencia>
+│  └──<Asignacion>
+│     ├──ID 'var1'
+│     ├──OPERADORASIGNACION '='
+│     └──<Expresion>
+│        └──<ExpresionAritmetica>
+│           ├──NUMERO '45'
+│           └──<ExpresionAritmeticaFinal>
+│              └──EPSILON
+├──PUNTOYCOMA (Token libre)
+└──<ProgramaFin>
+```
+> **SyntaxError**: se esperaba un **';'** en linea **1**
