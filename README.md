@@ -43,13 +43,13 @@ Examples
 
 ## Funcionamiento
 
-### Analisis Lexico
+### Análisis Léxico
 
-Esta fase tiene como entrada el codigo `*.js`, donde se va leyendo línea a línea, limpiando espacios en blanco y comentarios gracias a las expresiones regulares se [analiza](https://github.com/Veronesi/NodeCompiler/blob/e7702fe3cf06dffd7377b4712b6dc85122936f1a/src/tools/AnalisisLexico.js#L70-L135) cada elemento para insertarlo en la tabla de tokens (además de verificar si el mismo es una [palabra reservada](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/palabrasReservadas.js) o un [caracter](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/caracteres.js) ), indicando el tipo (ID, NUMERO, OPERADOR, etc.) y en que línea se encuentra. 
+Esta fase tiene como entrada el código fuente `*.js`, donde se va leyendo línea a línea, limpiando espacios en blanco y comentarios. Con la utilización de expresiones regulares, se [analiza](https://github.com/Veronesi/NodeCompiler/blob/e7702fe3cf06dffd7377b4712b6dc85122936f1a/src/tools/AnalisisLexico.js#L70-L135) cada elemento para insertarlo en la tabla de tokens (además de verificar si el mismo es una [palabra reservada](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/palabrasReservadas.js) o un [caracter](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/caracteres.js) ), indicando el tipo (ID, NUMERO, OPERADOR, etc.) y en qué línea se encuentra. 
 
-Una vez finalizada la fase de análisis léxico, continua el análisis sintáctico, verificando si el orden de estos token cumplen con las [posibles producciones] definidas anteriormente(https://github.com/Veronesi/NodeCompiler/blob/master/src/config/producciones.js), es decir, si "tiene sentido el orden de los mismos".
+Una vez finalizada la fase de análisis léxico, continua el análisis sintáctico, verificando si el orden de estos token cumplen con las [posibles producciones] definidas anteriormente (https://github.com/Veronesi/NodeCompiler/blob/master/src/config/producciones.js), es decir, si "tiene sentido el orden de los mismos".
 
-Codigo de entrada
+Código de entrada
 ```js
 A = 3;
 ```
@@ -69,39 +69,48 @@ var1 = $;
 ```
 > **LexicalError**: token no válido o inesperado **'$'** en linea **1**
 
-### Analisis Sintactico
-En esta fase de desidio dividir en 3 etapas. 
+### Análisis Sintáctico
+En esta fase se decidió dividir en 3 etapas. 
 
-**1.** Buscar un subarbol (sin importar que que no sea el raiz sea la produccion `<Programa>` ni que el arbol este completo) ya que eran muchos mas los posibles arboles que generen la produccion a medida que se van analizando los tokens que empezar por la produccion que genere el primer token. 
+**1.** Buscar un subárbol (sin importar que este no sea el raíz sea la producción, es decir el nodo `<Programa>` ni que el árbol este completo), ya que la cantidad de posibilidades que existen de árboles que tienen como nodo raíz `<Programa>` y como primer token el primer elemento de la tabla de tokens)  era mucho mayor a únicamente aquellos árboles que tienen como primer nodo el primer token de la tabla.
+**1.1** Se toma el primer elemento de la lista de tokens y se busca todas las producciones que general al mismo (aquellas producciones que el primer token que genera sea este).
 
-**1.1** Se toma el primer token de la lista de tokens y se busca todas las producciones que general al mismo (aquellas producciones que el primer token que genera sea este). 
-```js
 Ej.:
-Proximo Token: SIGNO
+Primer token de la tabla: `SIGNO` `<`
 
-posibles produccines que lo generan:
-<Condicion> => <ExpresionAritmetica> SIGNO <ExpresionAritmetica>
+Producciones que lo generan
+```diff
+{
+   name: 'Produccion', 
+   Produccion: '<Condicion>',
+   produce: [
+      '<ExpresionAritmetica>', 
+!     'SIGNO', 
+      '<ExpresionAritmetica>'
+     ]
+},
 ```
 **1.2.** se insertan todas las producciones en `AnalisisSintactico.produccion` que generan al token.
-```js
+
 Ej.:
-<Condicion>
-├──<ExpresionAritmetica> (Produccion libre)
-├──SIGNO '>'
-└──NUMERO (Token libre)
+```diff
+  <Condicion>
+  ├──<ExpresionAritmetica> (Produccion libre)
++ ├──SIGNO '>'
+  └──NUMERO (Token libre)
 ```
 
-**1.3.** Se toma el proximo token de la lista de tokens y se verifica cada posible produccion del paso anterior si sigue siendo posible.
+**1.3.** Se toma el próximo elemento  de la lista de tokens y se verifica cada producción (una a una) obtenida del paso anterior si sigue siendo un posible subárbol que genere a toda la tabla.
 
-**1.3.1.** si el token coincide con el proximo "token libre" de la posible produccion, este se inserta, caso contrario la produccion se descarta.
-```js
+**1.3.1.** Si el token coincide con el próximo "token libre" de la producción, este se inserta, caso contrario la producción se descarta.
+
 Ej.:
-Proximo Token: NUMERO
-   
-<Condicion>
-├──<ExpresionAritmetica> (Produccion libre)
-├──SIGNO '>'
-└──NUMERO '123' <- Se insertara en este Token libre
+Proximo Token: `NUMERO` `123`
+```diff
+  <Condicion>
+  ├──<ExpresionAritmetica> (Produccion libre)
+  ├──SIGNO '>'
++  └──NUMERO '123' <- Se insertara en este Token libre
 ```
 
 **1.3.2.** si no hay mas tokens libres se busca la primera "produccion libre" que se encuentre despues del ultimo token no-libre, reemplazando el mimso por aquellas producciones que generen a este token (si no hay produccion que genere a este token, la produccion se descarta).
