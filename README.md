@@ -110,68 +110,67 @@ Proximo Token: `NUMERO` `123`
   <Condicion>
   ├──<ExpresionAritmetica> (Produccion libre)
   ├──SIGNO '>'
-+  └──NUMERO '123' <- Se insertara en este Token libre
++ └──NUMERO '123' <- Se insertara en este Token libre
 ```
 
-**1.3.2.** si no hay mas tokens libres se busca la primera "produccion libre" que se encuentre despues del ultimo token no-libre, reemplazando el mimso por aquellas producciones que generen a este token (si no hay produccion que genere a este token, la produccion se descarta).
+**1.3.2.** si no hay mas tokens libres, se busca la primera "produccion libre" que se encuentre despues del ultimo token no-libre, reemplazando el mimso por aquellas producciones que generen a este token (si no hay produccion que genere a este token, la produccion se descarta).
    
-```js
 Ej.:
-Proximo Token: NUMERO (123)
-
-posible produccion:
+Proximo Token: `NUMERO` `123`   
+```diff
 <Asignacion>
-├──ID 'A'
-├──OPERADORASIGNACION '='
-└──<ExpresionAritmetica> (Produccion libre) <- Proxima produccion libre
-
-Producciones de <ExpresionAritmetica> que generan NUMERO
+  ├──ID 'A'
+  ├──OPERADORASIGNACION '='
+! └──<ExpresionAritmetica> (Produccion libre) <- Proxima produccion libre
+```
+Producciones de `<ExpresionAritmetica>` que generan `NUMERO`
+```diff
 <ExpresionAritmetica>
 ├──NUMERO
 └──<ExpresionAritmeticaFinal> 
-
+```
 
 Reemplazando en la posble produccion
-
+```diff
 <Asignacion>
-├──ID 'A'
-├──OPERADORASIGNACION '='
-└──<ExpresionAritmetica>                             |
-    ├──NUMERO '123'                                  | Nuevo bloque
-    └──<ExpresionAritmeticaFinal> (Produccion libre) |
+  ├──ID 'A'
+  ├──OPERADORASIGNACION '='
+! └──<ExpresionAritmetica>                             
++     ├──NUMERO '123'                                  
++     └──<ExpresionAritmeticaFinal> (Produccion libre) 
 ```  
 
-**1.3.3.** Si no hay ni token libres ni producciones libres se [busca](https://github.com/Veronesi/NodeCompiler/blob/812fd9cc2210fc26fc62d8aaf361af32b37e7895/src/tools/AnalisisSintactico.js#L325-L335) aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
+**1.3.3.** Si no hay ni token libres ni producciones libres, se [busca](https://github.com/Veronesi/NodeCompiler/blob/812fd9cc2210fc26fc62d8aaf361af32b37e7895/src/tools/AnalisisSintactico.js#L325-L335) aquellas producciones que generan al nodo raiz de esta produccion (en el caso de que nadie genere al nodo raiz, la produccion se descarta).
    
-```js
 Ej.:
-Proximo Token: PUNTOYCOMA
-
-posible produccion:
-<Asignacion>                 <- El unico que puede generar a PUNTOYCOMA
-├──ID 'A'
-├──OPERADORASIGNACION '='
-└──<Expresion>
-   └──<ExpresionAritmetica>
-      ├──NUMERO '3'
-      └──<ExpresionAritmeticaFinal>
-         └──EPSILON
-
-Producciones que generan a <Asignacion>
+Proximo Token: `PUNTOYCOMA`   
+```diff
+! <Asignacion>                 <- El unico que puede generar a PUNTOYCOMA
+  ├──ID 'A'
+  ├──OPERADORASIGNACION '='
+  └──<Expresion>
+     └──<ExpresionAritmetica>
+        ├──NUMERO '3'
+        └──<ExpresionAritmeticaFinal>
+           └──EPSILON
+```
+Producciones que generan a `<Asignacion>`
+```diff
 <Sentencia>
 └──<Asignacion>
+```
 
-Insertamos todas las producciones que generan a <Asignacion>
-
-<Sentencia>                        <- No es el Nodo Raiz del lenguaje
-└──<Asignacion>
-   ├──ID 'A'
-   ├──OPERADORASIGNACION '='
-   └──<Expresion>
-      └──<ExpresionAritmetica>
-         ├──NUMERO '3'
-         └──<ExpresionAritmeticaFinal>
-            └──EPSILON
+Insertamos todas las producciones que generan a `<Asignacion>`
+```diff
++ <Sentencia>                        <- No es el Nodo Raiz del lenguaje
+! └──<Asignacion>
+     ├──ID 'A'
+     ├──OPERADORASIGNACION '='
+     └──<Expresion>
+        └──<ExpresionAritmetica>
+           ├──NUMERO '3'
+           └──<ExpresionAritmeticaFinal>
+              └──EPSILON
 ```
 
 Una vez que se terminaron de analizar todas las posibles producciones para este token, si aun quedan producciones sin incluir a este (en el caso que haya pasado el punto 1.3.2 o 1.3.3) se pasa al proximo token, caso contrario se vuelven a analizar estas producciones hasta que incluyan al token.
@@ -180,95 +179,100 @@ Una vez que se terminaron de analizar todas las posibles producciones para este 
 
 ```js
 A = 3;
+```
 
-<Programa> <- Nodo Raiz
-├──<Sentencia>
-│  └──<Asignacion>
-│     ├──ID 'A'
-│     ├──OPERADORASIGNACION '='
-│     └──<Expresion>
-│        └──<ExpresionAritmetica>
-│           ├──NUMERO '3'
-│           └──<ExpresionAritmeticaFinal>
-│              └──EPSILON
-├──PUNTOYCOMA ';'
-└──<ProgramaFin> (Produccion libre)
+```diff
+! <Programa> <- Ya es Nodo Raiz
+  ├──<Sentencia>
+  │  └──<Asignacion>
+  │     ├──ID 'A'
+  │     ├──OPERADORASIGNACION '='
+  │     └──<Expresion>
+  │        └──<ExpresionAritmetica>
+  │           ├──NUMERO '3'
+  │           └──<ExpresionAritmeticaFinal>
+  │              └──EPSILON
+  ├──PUNTOYCOMA ';'
+  └──<ProgramaFin> (Produccion libre)
 ```
 
 **3.** Luego se trata de [completar](https://github.com/Veronesi/NodeCompiler/blob/812fd9cc2210fc26fc62d8aaf361af32b37e7895/src/tools/AnalisisSintactico.js#L371) todas las posibles producciones, es decir, que no quede ninguna "produccion libre" ni que quede un "token libre", quedando una unica produccion posible, sinedo esta la produccion que genera a la lista de tokens. 
 
 ```js
 A = 3;
+```
 
-<Programa>
-├──<Sentencia>
-│  └──<Asignacion>
-│     ├──ID 'A'
-│     ├──OPERADORASIGNACION '='
-│     └──<Expresion>
-│        └──<ExpresionAritmetica>
-│           ├──NUMERO '3'
-│           └──<ExpresionAritmeticaFinal>
-│              └──EPSILON
-├──PUNTOYCOMA ';'
-└──<ProgramaFin>
-   └──EPSILON
+```diff
+  <Programa> <- Ya es Nodo Raiz
+  ├──<Sentencia>
+  │  └──<Asignacion>
+  │     ├──ID 'A'
+  │     ├──OPERADORASIGNACION '='
+  │     └──<Expresion>
+  │        └──<ExpresionAritmetica>
+  │           ├──NUMERO '3'
+  │           └──<ExpresionAritmeticaFinal>
+  │              └──EPSILON
+  ├──PUNTOYCOMA ';'
+! └──<ProgramaFin>
++    └──EPSILON
 ```
 
 En esta fase puede generarse un error por (cuando solo queda una unica posible produccion, ya que si quedan varias esta se descarta): 
 - cuando se quiere insertar un token y existe un "token libre" y estos no coinciden
 ```js
-
 while(i < 10){ [       <-- Elemento '[' genera un error
     readint(Elem);
     a = cons(Elem, A);
     i = i+1;
 };
-
-Proximo Token: CORCHETE_OPEN
-<Ciclo>
-├──WHILE 'while'
-├──PARENTESIS_OPEN '('
-├──<Condicion>
-│  ├──<ExpresionAritmetica>
-│  │  ├──ID 'i'
-│  │  └──<ExpresionAritmeticaFinal>
-│  │     └──EPSILON
-│  ├──SIGNO '<'
-│  └──<ExpresionAritmetica>
-│     ├──NUMERO '10'
-│     └──<ExpresionAritmeticaFinal>
-│        └──EPSILON
-├──PARENTESIS_CLOSE ')'
-├──LLAVE_OPEN '{'
-├──<Programa>
-│  ├──<Sentencia>
-│  │  └──<Lectura>
-│  │     └──<LecturaLista>
-│  │        ├──READLIST                <- Proximo Token Libre
-│  │        └──<EscrituraLectura>
-│  ├──PUNTOYCOMA                     
-│  └──<ProgramaFin>
-└──LLAVE_CLOSE
+```
+Proximo Token: `CORCHETE_OPEN`
+```diff
+  <Ciclo>
+  ├──WHILE 'while'
+  ├──PARENTESIS_OPEN '('
+  ├──<Condicion>
+  │  ├──<ExpresionAritmetica>
+  │  │  ├──ID 'i'
+  │  │  └──<ExpresionAritmeticaFinal>
+  │  │     └──EPSILON
+  │  ├──SIGNO '<'
+  │  └──<ExpresionAritmetica>
+  │     ├──NUMERO '10'
+  │     └──<ExpresionAritmeticaFinal>
+  │        └──EPSILON
+  ├──PARENTESIS_CLOSE ')'
+  ├──LLAVE_OPEN '{'
+  ├──<Programa>
+  │  ├──<Sentencia>
+  │  │  └──<Lectura>
+  │  │     └──<LecturaLista>
+- │  │        ├──READLIST                <- Proximo Token Libre
+  │  │        └──<EscrituraLectura>
+  │  ├──PUNTOYCOMA                     
+  │  └──<ProgramaFin>
+  └──LLAVE_CLOSE
 ```
 > **SyntaxError**: token inesperado **'\['** en linea **1**
 
 - a la hora de verificar si la produccion esta completa (etapa 3), la unica produccion posible es descartada por que queda un token libre
 ```js
-
 var1 = 45
+```
 
-<Programa>
-├──<Sentencia>
-│  └──<Asignacion>
-│     ├──ID 'var1'
-│     ├──OPERADORASIGNACION '='
-│     └──<Expresion>
-│        └──<ExpresionAritmetica>
-│           ├──NUMERO '45'
-│           └──<ExpresionAritmeticaFinal>
-│              └──EPSILON
-├──PUNTOYCOMA (Token libre)
-└──<ProgramaFin>
+```diff
+  <Programa>
+  ├──<Sentencia>
+  │  └──<Asignacion>
+  │     ├──ID 'var1'
+  │     ├──OPERADORASIGNACION '='
+  │     └──<Expresion>
+  │        └──<ExpresionAritmetica>
+  │           ├──NUMERO '45'
+  │           └──<ExpresionAritmeticaFinal>
+  │              └──EPSILON
+- ├──PUNTOYCOMA (Token libre)
+  └──<ProgramaFin>
 ```
 > **SyntaxError**: se esperaba un **';'** en linea **1**
