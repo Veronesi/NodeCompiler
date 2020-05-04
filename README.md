@@ -287,3 +287,6 @@ var1 = 45
 > **SyntaxError**: se esperaba un **';'** en linea **1**
 
 ### Evaluador
+Tareas listas:
+- Ejecutar una asignacion numerica sin parensesis, Ej: `var1 = var3 + 45 * 77`
+- Ejecutar un cliclo IF
