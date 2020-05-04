@@ -3,16 +3,16 @@
 ## Table of contents
 
 - [Lista de comandos](#lista-de-comandos)
-- [Analizador lexico](https://github.com/Veronesi/NodeCompile)
-- [Analizador sintactico](https://github.com/Veronesi/NodeCompile)
-- [Evaluador](https://github.com/Veronesi/NodeCompile)
-- [Caracteres](https://github.com/Veronesi/NodeCompile)
-- [Palabras reservadas](https://github.com/Veronesi/NodeCompile)
-- [Producciones](https://github.com/Veronesi/NodeCompile)
-- [Manejo de errores](https://github.com/Veronesi/NodeCompile)
-- [Generacion de la tabla y arbol](https://github.com/Veronesi/NodeCompile)
-- [Generacion de codigo intermedio](https://github.com/Veronesi/NodeCompile)
-- [Ejemplo de compilacion](https://github.com/Veronesi/NodeCompile)
+- [Analizador lexico](#analisis-lexico)
+- [Analizador sintactico](#analisis-sintactico)
+- [Evaluador](#evaluador)
+- [Caracteres](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/caracteres.js)
+- [Palabras reservadas](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/palabrasReservadas.js)
+- [Producciones](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/producciones.js)
+- [Manejo de errores](https://github.com/Veronesi/NodeCompiler/wiki/Manejo-de-errores)
+- [Generacion de la tabla y arbol](https://github.com/Veronesi/NodeCompile) - Sin hacer
+- [Generacion de codigo intermedio](https://github.com/Veronesi/NodeCompile) - Sin hacer
+- [Ejemplo de compilacion](https://github.com/Veronesi/NodeCompiler/wiki/ejemplo-compilaci%C3%B3n)
 
 ## Lista de comandos
 
@@ -43,7 +43,7 @@ Examples
 
 ## Funcionamiento
 
-### Análisis Léxico
+### Analisis Lexico
 
 Esta fase tiene como entrada el código fuente `*.js`, donde se va leyendo línea a línea, limpiando espacios en blanco y comentarios. Con la utilización de expresiones regulares, se [analiza](https://github.com/Veronesi/NodeCompiler/blob/e7702fe3cf06dffd7377b4712b6dc85122936f1a/src/tools/AnalisisLexico.js#L70-L135) cada elemento para insertarlo en la tabla de tokens (además de verificar si el mismo es una [palabra reservada](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/palabrasReservadas.js) o un [caracter](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/caracteres.js) ), indicando el tipo (ID, NUMERO, OPERADOR, etc.) y en qué línea se encuentra. 
 
@@ -69,7 +69,7 @@ var1 = $;
 ```
 > **LexicalError**: token no válido o inesperado **'$'** en linea **1**
 
-### Análisis Sintáctico
+### Analisis Sintactico
 En esta fase se decidió dividir en 3 etapas. 
 
 **1.** Buscar un subárbol (sin importar que este no sea el raíz sea la producción, es decir el nodo `<Programa>` ni que el árbol este completo), ya que la cantidad de posibilidades que existen de árboles que tienen como nodo raíz `<Programa>` y como primer token el primer elemento de la tabla de tokens)  era mucho mayor a únicamente aquellos árboles que tienen como primer nodo el primer token de la tabla.
@@ -276,3 +276,5 @@ var1 = 45
   └──<ProgramaFin>
 ```
 > **SyntaxError**: se esperaba un **';'** en linea **1**
+
+### Evaluador
