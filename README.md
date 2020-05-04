@@ -2,6 +2,7 @@
 
 ## Table of contents
 
+- [Instalacion](#instalacion)
 - [Lista de comandos](#lista-de-comandos)
 - [Analizador lexico](#analisis-lexico)
 - [Analizador sintactico](#analisis-sintactico)
@@ -13,6 +14,14 @@
 - [Generacion de la tabla y arbol](https://github.com/Veronesi/NodeCompile) - Sin hacer
 - [Generacion de codigo intermedio](https://github.com/Veronesi/NodeCompile) - Sin hacer
 - [Ejemplo de compilacion](https://github.com/Veronesi/NodeCompiler/wiki/ejemplo-compilaci%C3%B3n)
+
+## Instalacion
+1. Instalar [Node.js](https://nodejs.org/es/)
+2. Clonar repo: `git clone https://github.com/Veronesi/NodeCompiler.git`
+3. Instalar modulos: `cd NodeCompiler` y luego `npm i`
+4. crear un archivo en la carpeta en `src/public` (o utilizar uno de los archivos que trae por defecto)
+5. Ejecutar el programa: `npm run parsing example.js show`
+
 
 ## Lista de comandos
 
