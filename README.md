@@ -182,7 +182,7 @@ A = 3;
 ```
 
 ```diff
-! <Programa> <- Ya es Nodo Raiz
++ <Programa> <- Ya es Nodo Raiz
   ├──<Sentencia>
   │  └──<Asignacion>
   │     ├──ID 'A'
