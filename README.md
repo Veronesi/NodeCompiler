@@ -287,6 +287,49 @@ var1 = 45
 > **SyntaxError**: se esperaba un **';'** en linea **1**
 
 ### Evaluador
-Tareas listas:
-- Ejecutar una asignacion numerica sin parensesis, Ej: `var1 = var3 + 45 * 77`
-- Ejecutar un cliclo IF
+
+El evaluador se encarga de recorrer todas las producciones `<Programa>`que se encuentran en el árbol generado por el analizador sintáctico, ejecutándolas de forma ordenada, en donde dependiendo del nodo hijo de la producción `<Sentencia>`, ejecutara una acción. 
+
+**1. `<Asignacion>`**
+Al ejecutar una asignación, el evaluador le asigna a la variable (`ID`) una variable temporal, la cual esta tendrá el nuevo valor de la variable. El evaluador recorrerá el subárbol `<Expresion>`.
+
+**1.1 Caso Expresión Numérica:** el evaluador verifica si se trata de un numero o una variable, si es un numero le asigna el valor del mismo a una nueva variable temporal, en caso de ser una variable, busca su valor en la tabla de variables. Una vez que se recorrió toda la producción `<Expresion>` el evaluador recorre la tabla de variables temporales desde el último elemento en ingresarse hasta el primero, reasignando los valores (cuando encuentra un `tempX` en la propiedad `value` busca su valor en la tabla), cuando todas las variables temporales fueron analizadas, se busca aquella variable que tenía como valor una variable temporal y se le asigna el valor "real" de la variable temporal.
+
+```js
+var1 = 4;
+var2 = var1 + 3;
+```
+
+| index | name | value | \_eval | type |
+| :---: | :---: | :---: | :---: | :---: |
+| 0 | 'temp1' | '4' | null | temp |
+| 1 | 'temp2' | '4 + temp3' | null | temp |
+| 2 | 'temp3' | 'temp4' | null | temp |
+| 3 | 'temp4' | '3' | null | temp |
+
+_La propiedad \_eval se encarga de guardar la segunda parte del valor de una variable temporal, si es que existe_
+
+
+| index | name | value | type |
+| :---: | :---: | :---: | :---: |
+| 0 | 'var1' | 4 | var |
+| 1 | 'var2' | 7 | var |
+
+Ejemplo de var2: 
+```js
+var2 = temp2
+
+temp4 = 3
+temp3 = temp4
+temp3 = 3
+temp2 = 4 + temp3
+temp2 = 4 + 3
+
+var2 = eval(4+3)
+var2 = 7
+```
+
+**1.2 Caso Expresion Lista: Falta programarlo**
+
+
+**2. `<Condicional>`**
