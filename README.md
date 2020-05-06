@@ -56,7 +56,7 @@ Examples
 
 Esta fase tiene como entrada el código fuente `*.js`, donde se va leyendo línea a línea, limpiando espacios en blanco y comentarios. Con la utilización de expresiones regulares, se [analiza](https://github.com/Veronesi/NodeCompiler/blob/e7702fe3cf06dffd7377b4712b6dc85122936f1a/src/tools/AnalisisLexico.js#L70-L135) cada elemento para insertarlo en la tabla de tokens (además de verificar si el mismo es una [palabra reservada](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/palabrasReservadas.js) o un [caracter](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/caracteres.js) ), indicando el tipo (ID, NUMERO, OPERADOR, etc.) y en qué línea se encuentra. 
 
-Una vez finalizada la fase de análisis léxico, continua el análisis sintáctico, verificando si el orden de estos token cumplen con las [posibles producciones] definidas anteriormente (https://github.com/Veronesi/NodeCompiler/blob/master/src/config/producciones.js), es decir, si "tiene sentido el orden de los mismos".
+Una vez finalizada la fase de análisis léxico, continua el análisis sintáctico, verificando si el orden de estos token cumplen con las [posibles producciones](https://github.com/Veronesi/NodeCompiler/blob/master/src/config/producciones.js) definidas anteriormente, es decir, si "tiene sentido el orden de los mismos".
 
 Código de entrada
 ```js
