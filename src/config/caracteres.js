@@ -69,11 +69,11 @@ const caracter = [
         valor: 'SIGNO'
     },
     {
-        caracter: '=<',
+        caracter: '<=',
         valor: 'SIGNO'
     },
     {
-        caracter: '=>',
+        caracter: '>=',
         valor: 'SIGNO'
     },
     {

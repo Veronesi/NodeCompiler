@@ -34,7 +34,7 @@ module.exports = class Evaluador {
                     break;
             }
         });
-        console.log(lista);
+        //console.log(lista);
     }
     /**
      * 
@@ -51,6 +51,10 @@ module.exports = class Evaluador {
         this.temps.push({ name: newTemp, value: null, _eval: null, type: 'temp' });
 
         return newVar;
+    }
+
+    getVar(name){
+        return this.vars.find(e => e.name == name).value
     }
 
     SetTemp(temp, value = null, operator = null) {
@@ -81,6 +85,7 @@ module.exports = class Evaluador {
 
     closeTemp(temp){
         const positionTemp = this.temps.findIndex(e => e.name == temp);
+        
         this.temps[positionTemp -1]._eval = null;
         this.temps.splice(positionTemp, 1);
         this.evalTemp();
@@ -119,6 +124,7 @@ module.exports = class Evaluador {
             default:
                 if(node.childs[0] == 'EPSILON'){
                     this.closeTemp(variable.name);
+
                     //this.evalTemp()
                 }else{
                     console.log(`ERROR en EvalExpresionAritmeticaFinal: ${node.childs[0].type}`)
@@ -130,7 +136,7 @@ module.exports = class Evaluador {
 
     EvalExpresionAritmetica(childs, variable) {
         // Verificamos que produccion es:
-        console.log(`\nExpresionAritmetica a evaluar: ${colors.cyan(childs[1].node)}`);
+        //console.log(`\nExpresionAritmetica a evaluar: ${colors.cyan(childs[1].node)}`);
         this.seeChilds(childs[1].childs);
         let newTemp;
         switch (childs[0].type) {
@@ -162,11 +168,7 @@ module.exports = class Evaluador {
                     this.error = true;
                 }
                 break;
-            /*
-                case 'PARENTESIS_OPEN':
-                this.EvalExpresionAritmetica(childs[1].childs, variable)
-                break;
-                */
+
             default:
                 console.log(`ERROR en EvalExpresionAritmetica: ${childs[0].type}`)
                 break;
@@ -180,7 +182,7 @@ module.exports = class Evaluador {
      * @module <Expresion>
      */
     EvalExpresion(expresion, variable) {
-        console.log(`\nExpresion a evaluar: ${colors.cyan(expresion.childs[0].node)}`);
+        //console.log(`\nExpresion a evaluar: ${colors.cyan(expresion.childs[0].node)}`);
         switch (expresion.childs[0].node) {
             case '<ExpresionAritmetica>':
                 this.seeChilds(expresion.childs[0].childs)
@@ -193,9 +195,20 @@ module.exports = class Evaluador {
                 console.log('ERROR en evalExpresion')
                 break;
         }
-        //console.log();
     }
+    EvalCondicion(condicion){
+        const _c1 = this.SetVar({ name: '_t', element: '$c1', type: 'ID', line: condicion.childs[1].line })
+        this.temp = _c1.value
+        this.EvalExpresionAritmetica(condicion.childs[0].childs, _c1)
 
+        const _c2 = this.SetVar({ name: '_t', element: '$c2', type: 'ID', line: condicion.childs[1].line })
+        this.temp = _c2.value
+        this.EvalExpresionAritmetica(condicion.childs[2].childs, _c2)
+        // Como los signos condicionales son iguales que el lenguaje que evalua la sentencia
+        // no es neceario ver de que signo se trata.
+
+        return eval(`${this.getVar('$c1')} ${condicion.childs[1].element} ${this.getVar('$c2')}`)
+    }
     /**
      * 
      * @param {Tree} tree 
@@ -204,7 +217,7 @@ module.exports = class Evaluador {
      */
     EvalSentencia(tree) {
         const sentencia = tree.childs[0]
-        console.log(`\nSentencia a analizar: ${colors.cyan(sentencia.node)}`)
+        //console.log(`\nSentencia a analizar: ${colors.cyan(sentencia.node)}`)
         this.seeChilds(sentencia.childs)
         switch (sentencia.node) {
             case '<Asignacion>':
@@ -213,17 +226,30 @@ module.exports = class Evaluador {
                 this.temp = newVar.value
                 this.EvalExpresion(sentencia.childs[2], newVar)
                 break;
+            case '<Condicional>':
+                const condicion = this.EvalCondicion(sentencia.childs[2]);
+                if(condicion){
+                    this.EvalPrograma(sentencia.childs[5]);
+                }
+                
+                break;
             default:
                 console.log(`Error: no existe la sentencia '${sentencia.node}'`)
                 break;
         }
     }
 
-    start() {
-        this.EvalSentencia(this.tree.childs[0])
+    EvalPrograma(tree){
+        while(tree.childs[0] != 'EPSILON'){
+            this.EvalSentencia(tree.childs[0]);
+            tree = tree.childs[2]
+        } 
+    }
 
-        if(this.tree.childs[2].childs[0] != 'EPSILON'){
-            this.EvalSentencia(this.tree.childs[2].childs[0])
+    start() {
+        while(this.tree.childs[0] != 'EPSILON'){
+            this.EvalSentencia(this.tree.childs[0]);
+            this.tree = this.tree.childs[2]
         }
         if(!this.error){
             console.table(this.vars)
