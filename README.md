@@ -331,5 +331,21 @@ var2 = 7
 
 **1.2 Caso Expresion Lista: Falta programarlo**
 
-
 **2. `<Condicional>`**
+Al ejecutar una asignación, el evaluador deberá saber si la comparación entre las dos <ExpresionAritmetica> resulta ser verdadera o falsa, para esto, el mismo crea una variable donde calculara y se guardara el valor de cada expresión para poder compararlas. (Para evitar colisionar con una creada por el usuario se le antepone el caracter $). Como el lenguaje a interpretar utiliza los mismos signos de comparación que el lenguaje compilador (Javascript) no es necesario implementar un "switch/case".
+
+Ejemplo:
+```js
+var1 = 4;
+if(var1 > 3){
+    var2 = var1 + 3;
+};
+```
+| index | name | value | type |
+| :---: | :---: | :---: | :---: |
+| 0 | 'var1' | 4 | var |
+| 1 | '$c1' | 4 | var |
+| 2 | '$c2' | 3 | var |
+| 3 | 'var2' | 7 | var |
+
+_donde $c1 referencia a la primera componente de la comparacion y $c2 a la segunda componente._
