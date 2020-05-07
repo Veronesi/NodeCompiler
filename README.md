@@ -110,13 +110,11 @@ sus notas fueron: [4, 7, 10, 8, 5]
 
 ## Ejecucion de ejemplos ya creados:
 
-> C:\...\NodeCompiler> npm run start testif.js show
+> C:\\...\NodeCompiler> npm run start testif.js show
 
-> C:\...\NodeCompiler> npm run parsing testwhile.js show
+> C:\\...\NodeCompiler> npm run parsing testwhile.js show
 
-> C:\...\NodeCompiler> npm run parsing testelseif.js show
-
-> C:\...\NodeCompiler> npm run parsing testIO.js show
+> C:\\...\NodeCompiler> npm run parsing testelseif.js show
 
 ## Lista de comandos
 
