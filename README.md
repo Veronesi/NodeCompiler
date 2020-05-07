@@ -3,6 +3,7 @@
 ## Table of contents
 
 - [Instalacion](#instalacion)
+- [guia de uso](#guia-de-uso)
 - [Lista de comandos](#lista-de-comandos)
 - [Analizador lexico](#analisis-lexico)
 - [Analizador sintactico](#analisis-sintactico)
@@ -21,6 +22,91 @@
 3. Instalar modulos: `cd NodeCompiler` y luego `npm i`
 4. crear un archivo en la carpeta en `src/public` (o utilizar uno de los archivos que trae por defecto)
 5. Ejecutar el programa: `npm run parsing example.js show`
+
+# Guia de uso
+
+Como no esta aun terminado por completo el interprete ([Evaluador](https://github.com/Veronesi/NodeCompiler/blob/master/src/tools/Evaluador.js)) es mejor utilizar el comando `parsing`, y utilzar `start` solo para asignaciones numericas y condicionales simples (sin else).
+
+## Sintaxis del lenguaje creado.
+
+**Asignacion**
+`x = y;`
+
+Ejemplo:
+```js
+var1 = 4;
+otraVariable = 4 + var1;
+notas = [1,0,7,4];
+```
+**Ciclo**
+`while(condicion){ciclo};`
+
+La expresión `condicion` se evalúa antes de entrar otra vez al bucle. Si esta condición se evalúa como verdadera, se ejecuta sentencia. Cuando la condición se evalúa como false, la ejecución continúa con la ejecución del programa.
+
+La expresión `ciclo` es un programa (es decir, puede ser cualquier cosa) que se ejecutara mientras la `condicion` sea verdadera.
+
+Ejemplo:
+```js
+var1 = 4;
+while(var1 > 0){
+    var1 = var1 - 1;
+    writeint(var1);
+};
+```
+output:
+```
+3
+2
+1
+0
+```
+
+**Condicional**
+`if(condicion){sentencia1}else{sentencia2};` o `if(condicion){sentencia1};`
+
+La expresión `condicion` se evalúa antes de ejecutar `sentencia1`. Si esta condición se evalúa como verdadera, se ejecuta `sentencia1`, caso contrario se ejecutara `sentencia2`.
+
+Ejemplo:
+```js
+var1 = 4;
+if(var1 > 3){
+    var1 = var1 * 4;
+}else{
+    var1 = var1 + 4;
+};
+```
+
+**Lectura**
+`readint(cadena, x);` o `readlist(cadena, x);` 
+
+el string `cadena` se mostrara en pantalla antes de que el programa le pida al usuario ingresar un numero (en caso de `writeint`) o una lista numerica (en caso de `writelist`). en la variable x se guardara lo que haya sido ingresado por el usuario.
+
+Ejemplo:
+```js
+readint("edad: ", edadUsuario);
+if(edadUsuario >= 18){
+    # El usuario es mayor de edad
+}else{
+    # El usuario no es mayor de edad
+};
+```
+_En este lenguaje el caracter `#` representa un comentario estilo linea_
+
+**Escritura**
+`writeint(cadena, x);` o `writelist(cadena, x);` 
+
+el string `cadena` se mostrara en pantalla junto con la variable `x`, siendo este un numero en caso de `writeint` o una lista numerica en caso de `writelist`.
+
+Ejemplo:
+```js
+notasUsuario = [4, 7, 10, 8, 5]
+readint("sus notas fueron: ", notasUsuario);
+```
+
+output:
+```
+sus notas fueron: [4, 7, 10, 8, 5]
+```
 
 
 ## Lista de comandos
