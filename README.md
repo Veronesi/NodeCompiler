@@ -36,7 +36,7 @@ Ejemplo:
 ```js
 var1 = 4;
 otraVariable = 4 + var1;
-notas = [1,0,7,4];
+notas = cons(1,0,7,4);
 ```
 **Ciclo**
 `while(condicion){ciclo};`
@@ -50,7 +50,7 @@ Ejemplo:
 var1 = 4;
 while(var1 > 0){
     var1 = var1 - 1;
-    writeint(var1);
+    writeint("",var1);
 };
 ```
 output:
@@ -99,7 +99,7 @@ el string `cadena` se mostrara en pantalla junto con la variable `x`, siendo est
 
 Ejemplo:
 ```js
-notasUsuario = [4, 7, 10, 8, 5]
+notasUsuario = cons(4, 7, 10, 8, 5)
 readint("sus notas fueron: ", notasUsuario);
 ```
 
